@@ -3,6 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from "axios";
 import Phase from "@/components/Phase.vue";
+import ProcessConfig from "@/components/popup/ProcessConfig.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -19,7 +20,7 @@ onMounted(() => {
 function loadTasks() {
     axios.post(`${import.meta.env.VITE_URL_BASE_API}/Task/listAllTasks`, {
         processId: idProcess,
-        tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NzU4MjAxYTA3ZjhmN2U1YzY0MzE3MCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxODk3NzAyNSwiZXhwIjoxNzE5MDYzNDI1fQ.zgjIkN0kaYFVT6nYXnoyGhXiTsrInG-bGZS2xLu4arU"
+        tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NzU4MjAxYTA3ZjhmN2U1YzY0MzE3MCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxOTIzODU0NywiZXhwIjoxNzE5MzI0OTQ3fQ.SXmXNRhMCFwaOF93sZLbCcTohTZ3-I9fz2AiulBz8G4"
     })
     .then(function (response) {
         if (response.data.success) {
@@ -46,7 +47,8 @@ function loadTasks() {
                         
                         <v-btn icon="mdi-filter-variant" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark); margin-right: .5rem"></v-btn>
 
-                        <v-btn icon="mdi-cog" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+                        <!-- <v-btn icon="mdi-cog" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn> -->
+                         <ProcessConfig title="Configurações do projeto" :new="false" />
                     </template>
                 </v-list-item>
             </v-card>

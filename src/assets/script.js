@@ -24,7 +24,7 @@ async function dropPhase(ev, id) {
         dataTask: {
           phase_id: id
         },
-        tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NzU4MjAxYTA3ZjhmN2U1YzY0MzE3MCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxODk3NzAyNSwiZXhwIjoxNzE5MDYzNDI1fQ.zgjIkN0kaYFVT6nYXnoyGhXiTsrInG-bGZS2xLu4arU"
+        tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NzU4MjAxYTA3ZjhmN2U1YzY0MzE3MCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxOTIzODU0NywiZXhwIjoxNzE5MzI0OTQ3fQ.SXmXNRhMCFwaOF93sZLbCcTohTZ3-I9fz2AiulBz8G4"
       }),
     });
     if (response.ok) {

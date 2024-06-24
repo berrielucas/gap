@@ -1,12 +1,13 @@
 <script setup>
-import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { ref } from 'vue';
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import ProcessConfig from "@/components/popup/ProcessConfig.vue";
 const route = useRoute();
 const nameEnv = route.params.name;
 
 const drawer = ref(true);
 const menu = ref(false);
-// const theme = ref("light");
+const search = ref("");
 
 </script>
 
@@ -33,10 +34,32 @@ const menu = ref(false);
 
     <div class="px-2 my-2 mt-5">
 
-      <v-skeleton-loader
+      <!-- <v-skeleton-loader
         class="mx-auto border mb-2"
         type="list-item-two-line"
-      ></v-skeleton-loader>
+      ></v-skeleton-loader> -->
+      <div style="display: flex; align-items: center; justify-content: center; color: var(--text-color-dark); border: solid 1px #bfbfbf; border-radius: 10px; overflow: hidden; padding: .5rem; gap: .5rem; margin-block: 1rem;">
+        <v-icon icon="mdi-magnify" size="23"></v-icon>
+        <input type="text" placeholder="Buscar aqui" style="display: flex;  background-color: var(--bg-color-light);  border: none; outline: none; color: var(--text-color-dark); width: 100%;">
+      </div>
+
+      <ProcessConfig title="Novo Projeto" :new="true" />
+    </div>
+
+    <div class=" my-2 mt-5">
+
+      <div>
+        <v-list-item style="padding: .8rem .5rem .8rem .8rem; color: var(--text-color-dark);" @click="$router.push({name:'process-unique'})" >
+          <v-list-item-title><b>Homologação</b></v-list-item-title>
+          <p style="color: #8f8f8f; font-size: 14px;">57 registros</p style="color: #efefef;">
+
+          <template v-slot:append>
+              <v-btn icon="mdi-content-duplicate" variant="text" density="compact" style="border-radius: 10px; font-size: 13px; color: var(--text-color-dark);"></v-btn>
+              <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+          </template>
+        </v-list-item>
+        <v-divider></v-divider>
+      </div>
 
     </div>
   </v-navigation-drawer>
