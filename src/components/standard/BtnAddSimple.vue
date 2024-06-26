@@ -24,19 +24,29 @@ defineProps({
 
 <style scoped>
 
-.btn-add{
+.btn-add {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background-color: var(--bg-color-dark);
   color: var(--text-color-light);
+  background-color: var(--bg-color-dark);
   text-transform: initial;
   
   & h4{
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: var(--font-family) !important;
+    /* border: solid 1px red;        */
     font-weight: 600;
-    font-size: 17px;
+    font-size: 16px;
     min-width: 90px;
+  }
+
+  *{
+    margin: 0;
+    padding: 0;
+    display: flex
   }
 }
 

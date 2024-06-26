@@ -11,22 +11,27 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'process',
+          name: 'followup',
           component: () => import('../views/EnvView.vue'),
           children:[
             {
-              path: 'processo/:idProcess',
-              name: 'process-unique',
-              component: () => import('../views/PocessView.vue')
+              path: 'seguimento/:idFollowup',
+              name: 'followup-unique',
+              component: () => import('../views/FollowupView.vue')
             },
           ]
         }
       ]
     },
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue')
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/not-found',
+      name: 'not',
+      component: () => import('../views/Not-Found.vue')
     },
     {
       path: '/:pathMatch(.*)',

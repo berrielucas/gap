@@ -31,7 +31,7 @@ const props = defineProps({
             </v-list-item>
         </div>
         <div :id="id" class="etapa-cards" ondrop="dropPhase(event, id)" ondragover="allowDropPhase(event)">
-            <CardTask v-for="task, index in tasks" :key="index" :id="task._id" /> 
+            <CardTask v-for="task, index in tasks" :key="index" :id="task._id" :title="task.title" /> 
         </div>
     </v-card>
 </template>
@@ -56,6 +56,7 @@ const props = defineProps({
     align-items: center;
     justify-content: space-between;
     color: var(--text-color-dark);
+    box-shadow: 0 0 10px #9e9e9e; 
 
     & .h4{
         font-weight: 700;

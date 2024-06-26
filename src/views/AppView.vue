@@ -1,12 +1,25 @@
 <script setup>
-import { ref } from 'vue';
-import { RouterView } from 'vue-router'
+import { ref, onMounted } from 'vue';
+import { RouterView, useRoute, useRouter } from 'vue-router'
+import { useCounterStore } from '../stores/counter.js'
+const store = useCounterStore();
+const route = useRoute();
+const router = useRouter();
 const theme = ref("light");
+
+onMounted(()=>{
+  if (!store.auth) {
+    router.push({name: 'login'});
+  } else if (store.environments.filter(e => e.url===route.params.name).length===0) {
+    router.push({name: 'not'});
+  }
+});
+
 
 </script>
 
 <template>
-  <v-app :theme="theme">
+  <v-app :theme="theme" v-if="store.environments.filter(e => e.url===route.params.name).length>0">
 
     <v-app-bar
       height="60"
