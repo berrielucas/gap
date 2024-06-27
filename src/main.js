@@ -27,4 +27,4 @@ app.use(router)
 app.use(vuetify)
 app.mount('#app')
 
-import './assets/script'
+import '../public/script'

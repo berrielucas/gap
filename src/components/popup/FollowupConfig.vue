@@ -32,7 +32,8 @@ const newFollowup = ref(props.new);
 // Configs
 const store = useCounterStore();
 const dialog = ref(false);
-const dialogClose = ref(false);
+const dialogConfirm = ref(false);
+const messageConfirm = ref("");
 const tab = ref("phases");
 const modeColor = ref("hex");
 const drag = ref(false);
@@ -88,12 +89,16 @@ const verify = computed(()=>{
 });
 
 function closeDialog() {
-  if (followupOrigin!==JSON.stringify(followup.value)&&dialogClose.value===false) {
-    dialogClose.value = true;
+  if (followupOrigin!==JSON.stringify(followup.value)&&dialogConfirm.value===false) {
+    messageConfirm.value = newFollowup.value ? "Você ainda não salvou o seguimento, deseja mesmo sair?" : "Você tem alterações ainda não salvas, deseja mesmo sair?";
+    dialogConfirm.value = true;
   } else {
-    dialogClose.value = false;
-    dialog.value = false; 
-    followup.value = JSON.parse(followupOrigin);
+    dialogConfirm.value = false;
+    messageConfirm.value = "";
+    setTimeout(()=>{
+      dialog.value = false; 
+      followup.value = JSON.parse(followupOrigin);
+    }, 400)
   }
 }
   
@@ -114,25 +119,17 @@ function closeDialog() {
       
       <v-card style="color: var(--text-color); height: 500px; width: 900px; align-self: center; ">
 
-        <v-dialog
-          v-model="dialogClose"
-          width="auto"
-          persistent
-        >
-          <v-card
-            max-width="350"
-          >
-
-            <v-banner
-              style="font-size: 15px; width: 100%; color: var(--text-color-dark);"
-            >
+        <!-- Popup Confirm -->
+        <v-dialog v-model="dialogConfirm" width="auto" persistent>
+          <v-card max-width="350">
+            <v-banner style="font-size: 15px; width: 100%; color: var(--text-color-dark);">
               <template v-slot:prepend>
-                <v-icon size="40">mdi-progress-alert</v-icon>
+                <v-icon size="40">mdi-weather-cloudy-clock</v-icon>
               </template>
-              <p>Você tem alterações ainda não salvas, deseja mesmo sair?</p>
+              <p>{{ messageConfirm }}</p>
             </v-banner>
             <template v-slot:actions>
-              <v-btn density="comfortable" class="ms-auto text-none" text="Cancelar" style="border-radius: 5px; border: solid 1px;" @click="dialogClose = false"></v-btn>
+              <v-btn density="comfortable" class="ms-auto text-none" text="Cancelar" style="border-radius: 5px; border: solid 1px;" @click="dialogConfirm = false"></v-btn>
               <v-btn class="me-2 text-none" text="Sair mesmo assim" color="error" variant="tonal" density="comfortable" style="border-radius: 5px; " @click="closeDialog"></v-btn>
             </template>
           </v-card>

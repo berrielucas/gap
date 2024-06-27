@@ -48,7 +48,7 @@ store.listAllTasks(route.params.idFollowup);
     flex-direction: column;
     height: 100%;
     padding: 1rem 0 0;
-    background-image: url('../assets/bg22.png');
+    background-image: url('../assets/bg22.jpg');
     background-repeat: no-repeat;
     background-size: cover;
     width: 100%;
