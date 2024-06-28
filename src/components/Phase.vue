@@ -20,27 +20,30 @@ const props = defineProps({
 </script>
 
 <template>
-     <v-card elevation="10" class="etapa">
-        <div class="etapa-header">
-            <v-list-item style="width: 100%; margin: 0; padding: 0 .3rem 0 .7rem;">
-                <v-list-item-title class="h4">{{ title }}</v-list-item-title>
-                <template v-slot:append>
-                    <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
-                    <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
-                </template>
-            </v-list-item>
-        </div>
-        <div :id="id" class="etapa-cards" ondrop="dropPhase(event, id)" ondragover="allowDropPhase(event)">
-            <CardTask v-for="task, index in tasks" :key="index" :id="task._id" :title="task.title" /> 
-        </div>
-    </v-card>
+    <div :id="id" :class="id" ondrop="dropPhase(event, id)" ondragenter="enter(event, id)" ondragleave="leave(event, id)" ondragover="allowDropPhase(event)" style="height: 100%; position: relative;"  >
+        <v-card :id="`etapa-${id}`" elevation="10" class="etapa">
+            <div :id="`etapa-header-${id}`"  class="etapa-header">
+                <v-list-item style="width: 100%; margin: 0; padding: 0 .3rem 0 .7rem;">
+                    <v-list-item-title class="h4">{{ title }}</v-list-item-title>
+                    <template v-slot:append>
+                        <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+                        <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+                    </template>
+                </v-list-item>
+            </div>
+            <section :id="`etapa-cards-${id}`" class="etapa-cards">
+                <CardTask v-for="task, index in tasks" :key="index" :id="task._id" :title="task.title" />
+            </section>
+            <div :id="`model-${id}`" class="model"></div>
+        </v-card>
+    </div>
 </template>
 
 <style scoped>
 
 .etapa{
     background-color: #ececec3a;
-    height: 100%;
+    height: auto;
     display: flex; 
     flex-direction: column; 
     min-width: 290px;
@@ -65,12 +68,16 @@ const props = defineProps({
 }
 
 .etapa-cards{
-    height: 100%;
+    height: auto;
     display: flex; 
     flex-direction: column; 
     padding: .8rem .5rem; 
     overflow: auto;
-    gap: .5rem;
+    gap: .8rem;
+    /* padding-bottom: .8rem; */
+    /* background-color: #ececec3a;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px); */
 }
 
 .etapa-cards::-webkit-scrollbar{
@@ -83,6 +90,15 @@ const props = defineProps({
 .etapa-cards::-webkit-scrollbar-thumb{
     background-color: var(--scroll-color-thumb);
     border-radius: 20px;
+}
+
+.model{
+    height: 40px;
+    border: dashed 1px var(--text-color-dark);
+    border-radius: 10px;
+    margin-inline: .5rem;
+    margin-bottom: .8rem;
+    display: none;
 }
 
 </style>

@@ -15,11 +15,27 @@ const router = createRouter({
           component: () => import('../views/EnvView.vue'),
           children:[
             {
+              path: '',
+              name: 'initial',
+              component: () => import('../views/InitialView.vue')
+            },
+            {
               path: 'seguimento/:idFollowup',
               name: 'followup-unique',
               component: () => import('../views/FollowupView.vue')
             },
           ]
+        }
+      ]
+    },
+    {
+      path: '/ambientes',
+      // name: 'all-env',
+      component: AppView,
+      children: [
+        {
+          path: '',
+          component: () => import('../views/AllEnvView.vue'),
         }
       ]
     },

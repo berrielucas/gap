@@ -36,12 +36,14 @@ const props = defineProps({
     display: flex; 
     border-radius: 4px;
     padding: .3rem;
+    /* margin: 0 .5rem; */
     color: var(--text-color-dark)
 }
 
 .card-item:active {
     cursor: grabbing !important;
     box-shadow: 0 0 0 transparent !important;
+    opacity: .5;
 }
 
 .card-item:active > .etapa-cards:hover { 

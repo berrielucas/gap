@@ -4,27 +4,38 @@ import axios from 'axios';
 
 export const useCounterStore = defineStore('counter', () => {
 
-  const auth = ref(true);
-  const user = reactive({});
+  const auth = ref(false);
+  const user = ref({});
   const environments = ref([]);
   const followup = ref([]);
   const tasks = ref([]);
 
-  function login() {
+  function login(obj) {
     auth.value = true;
+    user.value = obj.user;
+    user.value.token = obj.token;
+    listAllFollowup();
   }
 
   function logout() {
     auth.value = false;
+    user.value = {};
   }
 
-  function listAllEnvironment() {
+  function listAllEnvironment(router=null) {
     axios.post(`${import.meta.env.VITE_URL_BASE_API}/Environment/listAllEnvironment`, {
-      tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2N2MyMDRlY2QxMzdlZDZjZWZlNzUxOCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxOTQ0ODIxNCwiZXhwIjoxNzE5NTM0NjE0fQ.Ocj37o3UEnABV4kJfaPoPOBTkMh-2JKbshcJZyD_OrA"
+      tokenUser: user.value.token
   })
   .then(function (response) {
       if (response.data.success) {
         environments.value = response.data.data;
+        if (router!==null) {
+          if (environments.value.length===1) {
+            router.push(`/${environments.value[0].url}/`);
+          } else {
+            router.push({name:'all-env'});
+          }
+        }
       }
   })
   .catch(function (error) { console.log(error) })
@@ -32,7 +43,7 @@ export const useCounterStore = defineStore('counter', () => {
 
   function listAllFollowup() {
     axios.post(`${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`, {
-      tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2N2MyMDRlY2QxMzdlZDZjZWZlNzUxOCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxOTQ0ODIxNCwiZXhwIjoxNzE5NTM0NjE0fQ.Ocj37o3UEnABV4kJfaPoPOBTkMh-2JKbshcJZyD_OrA"
+      tokenUser: user.value.token
   })
   .then(function (response) {
       if (response.data.success) {
@@ -45,7 +56,7 @@ export const useCounterStore = defineStore('counter', () => {
   function listAllTasks(followup) {
     axios.post(`${import.meta.env.VITE_URL_BASE_API}/Followup/listAllTasks`, {
       followupId: followup,
-      tokenUser: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2N2MyMDRlY2QxMzdlZDZjZWZlNzUxOCIsImVtYWlsIjoibHVjYXNiZXJyaWVsQGVtYWlsLmNvbSIsImlhdCI6MTcxOTQ0ODIxNCwiZXhwIjoxNzE5NTM0NjE0fQ.Ocj37o3UEnABV4kJfaPoPOBTkMh-2JKbshcJZyD_OrA"
+      tokenUser: user.value.token
   })
   .then(function (response) {
       if (response.data.success) {

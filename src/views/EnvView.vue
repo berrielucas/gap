@@ -1,11 +1,18 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import FollowupConfig from "@/components/popup/FollowupConfig.vue";
 import { useCounterStore } from '../stores/counter.js'
 const store = useCounterStore();
 const route = useRoute();
 const router = useRouter();
+
+onMounted(()=>{
+  if (store.environments.filter(e => e.url===route.params.name).length===0) {
+    router.push({name: 'not'});
+  }
+});
+
 const Env = store.environments.filter(e => e.url===route.params.name)[0];
 
 const drawer = ref(true);
@@ -35,25 +42,25 @@ const followupModel = {
 			visible: true
 		}
 	],
-  environment_id: Env._id,
+  environment_id: Env ? Env._id : null,
 }
 
 </script>
 
 <template>
-  <v-navigation-drawer v-model="drawer" permanent elevation="5" >
+  <v-navigation-drawer v-if="store.environments.filter(e => e.url===route.params.name).length>0" v-model="drawer" permanent elevation="5" >
     <div class="d-flex px-2 my-2 justify-center">
-      <v-menu transition="slide-y-transition" v-model="menu" persistent>
+      <v-menu transition="scale-transition" location="bottom center" v-model="menu" persistent>
         <template v-slot:activator="{ props }">
-          <v-list-item :class="menu?'env-active':'env-deactive'" v-bind="props" style="width: 100%; margin: 0; transition: all .2s ease-in-out;">
+          <v-list-item :class="menu?'env-active':'env-deactive'" v-bind="props" style="border-radius: 10px !important; width: 100%; margin: 0; transition: all .2s ease-in-out;">
             <template v-slot:append>
-              <v-icon id="icon-env":icon="!menu?'mdi-chevron-down':'mdi-close'"></v-icon>
+              <v-icon id="icon-env":icon="!menu?'mdi-chevron-down':'mdi-chevron-up'"></v-icon>
             </template>
             <v-list-item-title>{{ Env.name }}</v-list-item-title>
           </v-list-item>
         </template>
 
-        <v-list style="margin: .5rem .3rem 0 -.3rem; padding: 0; background-color: var(--bg-color-dark); color: var(--text-color-light);">
+        <v-list style="margin: .5rem .3rem 0 -.3rem; border-radius: 10px !important; padding: 0; background: linear-gradient(45deg, rgba(0,34,55,1) 0%, rgba(1,12,24,1) 50%, rgba(0,34,55,1) 100%); color: var(--text-color-light); color: var(--text-color-light);">
           <v-list-item>
             <v-list-item-title>Lucas Berriel</v-list-item-title>
           </v-list-item>
@@ -94,16 +101,27 @@ const followupModel = {
           </template>
         </v-list-item>
     
+        <!-- <v-color-picker width="90%" elevation="3" style="margin-inline: auto; margin-top: 2rem;"></v-color-picker> -->
     </div>
   </v-navigation-drawer>
 
   <v-main id="main">
     <RouterView/>
-    <h1 v-if="!route.params.idFollowup">Lucas</h1>
   </v-main>
 </template>
 
 <style scoped>
+
+#main::-webkit-scrollbar{
+    width: 7px;
+}
+#main::-webkit-scrollbar-track{
+    background-color: transparent;
+}
+#main::-webkit-scrollbar-thumb{
+    background-color: var(--scroll-color-thumb);
+    border-radius: 20px;
+}
 
 #icon-env{
   transition: all .5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -111,12 +129,10 @@ const followupModel = {
 
 .env-deactive #icon-env{
   transform: rotate(0deg);
-  scale: 1;
 }
 
 .env-active #icon-env{
-  transform: rotate(-90deg);
-  scale: 0.8;
+  transform: rotate(-360deg);
 }
 
 #main{
@@ -130,7 +146,7 @@ const followupModel = {
 
 .followup-active::before{
   content: " ";
-  background-color: #009877;
+  background-color: var(--button-color);
   height: 80%;
   width: 7px;
   position: absolute;

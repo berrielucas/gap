@@ -107,40 +107,36 @@ function closeDialog() {
 
 <template>
   <div>
-    <v-dialog v-model="dialog" style="" persistent>
-      <template v-slot:activator="{ props: activatorProps }">
-        <v-btn v-if="newFollowup" variant="tonal" class="text-none btn-new" flat v-bind="activatorProps">
-            <v-icon icon="mdi-plus"></v-icon>
-            <h4>Novo Seguimento</h4>
-        </v-btn>
-        <v-btn v-else icon="mdi-cog" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);" v-bind="activatorProps"></v-btn>
-      </template>
+    <v-btn v-if="newFollowup" variant="tonal" class="text-none btn-new" flat @click="dialog = true">
+        <v-icon icon="mdi-plus"></v-icon>
+        <h4>Novo Seguimento</h4>
+    </v-btn>
+    <v-btn v-else icon="mdi-cog" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);" @click="dialog = true"></v-btn>
 
-      
+    <!-- Popup Confirm -->
+    <v-dialog v-model="dialogConfirm" width="auto" persistent>
+      <v-card max-width="350">
+        <v-banner style="font-size: 15px; width: 100%; color: var(--text-color-dark);">
+          <template v-slot:prepend>
+            <v-icon size="40">mdi-weather-cloudy-clock</v-icon>
+          </template>
+          <p>{{ messageConfirm }}</p>
+        </v-banner>
+        <template v-slot:actions>
+          <v-btn density="comfortable" class="ms-auto text-none" text="Cancelar" style="border-radius: 5px; border: solid 1px;" @click="dialogConfirm = false"></v-btn>
+          <v-btn class="me-2 text-none" text="Sair mesmo assim" color="error" variant="tonal" density="comfortable" style="border-radius: 5px; " @click="closeDialog"></v-btn>
+        </template>
+      </v-card>
+    </v-dialog>
+
+    <!-- Popup principal -->
+    <v-dialog v-model="dialog" width="auto" persistent>
       <v-card style="color: var(--text-color); height: 500px; width: 900px; align-self: center; ">
-
-        <!-- Popup Confirm -->
-        <v-dialog v-model="dialogConfirm" width="auto" persistent>
-          <v-card max-width="350">
-            <v-banner style="font-size: 15px; width: 100%; color: var(--text-color-dark);">
-              <template v-slot:prepend>
-                <v-icon size="40">mdi-weather-cloudy-clock</v-icon>
-              </template>
-              <p>{{ messageConfirm }}</p>
-            </v-banner>
-            <template v-slot:actions>
-              <v-btn density="comfortable" class="ms-auto text-none" text="Cancelar" style="border-radius: 5px; border: solid 1px;" @click="dialogConfirm = false"></v-btn>
-              <v-btn class="me-2 text-none" text="Sair mesmo assim" color="error" variant="tonal" density="comfortable" style="border-radius: 5px; " @click="closeDialog"></v-btn>
-            </template>
-          </v-card>
-        </v-dialog>
-
         <!-- Titulo/Header do Popup -->
         <v-card-title elevation="3" style="display: flex; align-items: center; justify-content: space-between; padding: .2rem .5rem .2rem .5rem; background-color: var(--bg-color-gray); color: var(--text-color-dark); box-shadow: 0 0 5px #939393;" >
             <h4>{{ title }}</h4>
             <span>
-              <v-btn v-show="verify" class="me-2 text-none" :text="newFollowup?'Salvar':'Salvar alterações'" :color="newFollowup?'success':'warning'" prepend-icon="mdi-check" variant="tonal" density="comfortable" style="border-radius: 10px; margin-right: .5rem; border: solid 1px;"></v-btn>
-              <!-- <v-btn icon="mdi-check" variant="text" density="comfortable" style="border-radius: 10px; color: var(--button-color); margin-right: .5rem;"></v-btn> -->
+              <v-btn v-show="verify" class="me-2 text-none" :text="newFollowup?'Salvar':'Salvar alterações'" :color="newFollowup?'#00b5d9':'warning'" prepend-icon="mdi-check" variant="tonal" density="comfortable" style="border-radius: 10px; margin-right: .5rem; border: solid 1px;"></v-btn>
               <v-btn icon="mdi-close" variant="text" density="comfortable" style="border-radius: 10px; color: var(--text-color-dark);" @click="closeDialog"></v-btn>
             </span>
         </v-card-title>
@@ -162,7 +158,7 @@ function closeDialog() {
             </v-col>
 
             <div style="display: flexbox; height: 100%; width: 100%;">
-              <div style="overflow: hidden; border: solid 1px red; height: 100%; width: 100%;">
+              <div style="overflow: hidden; height: 100%; width: 100%;">
 
                 <v-tabs
                   v-model="tab"
@@ -194,16 +190,16 @@ function closeDialog() {
                               <v-text-field density="comfortable" variant="solo" hide-details v-model="element.title"></v-text-field>
                             </div>
   
-                            <v-menu transition="slide-y-transition" :close-on-content-click="false">
+                            <!-- <v-menu transition="slide-y-transition" :close-on-content-click="false">
                               <template v-slot:activator="{ props }">
                                 <v-avatar :color="element.color" size="23"v-bind="props" style="margin-right: .5rem;"></v-avatar>
                               </template>
                               <v-list style="margin: .5rem .3rem 0 -.3rem; padding: 0; background-color: var(--bg-color-dark); color: var(--text-color-light);">
                                 <v-color-picker v-model:mode="modeColor" v-model="element.color" ></v-color-picker>
                               </v-list>
-                            </v-menu>
+                            </v-menu> -->
   
-                            <v-btn class="trash" :icon="element.visible ? 'mdi-eye' : 'mdi-eye-off'" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark); font-size: 14px;"  @click="element.visible = !element.visible"></v-btn>
+                            <v-btn class="trash" :icon="element.visible ? 'mdi-eye' : 'mdi-eye-off'" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark); font-size: 14px; margin-right: .3rem;"  @click="element.visible = !element.visible"></v-btn>
   
                             <v-btn class="trash" icon="mdi-trash-can" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark); margin-right: .5rem; font-size: 14px;"  @click="removeAt(element.id)"></v-btn>
   
@@ -275,7 +271,7 @@ h4{
   text-transform: initial;
   width: 100%;
   border-radius: 8px;
-  border: solid 1px #00c79c37;
+  border: solid 1px #4FD8F237;
   
   & h4{
     font-family: var(--font-family) !important;
