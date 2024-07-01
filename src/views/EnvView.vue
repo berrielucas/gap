@@ -8,9 +8,10 @@ const route = useRoute();
 const router = useRouter();
 
 onMounted(()=>{
-  if (store.environments.filter(e => e.url===route.params.name).length===0) {
+  if (store.environments.filter(e => e.url===route.params.name).length===0||!store.environments.filter(e => e.url===route.params.name)[0].active) {
     router.push({name: 'not'});
   }
+  store.listAllFollowup(store.environments.filter(e => e.url===route.params.name)[0]._id);
 });
 
 const Env = store.environments.filter(e => e.url===route.params.name)[0];
@@ -70,21 +71,23 @@ const followupModel = {
 
     <div class="px-2 my-2 mt-5">
 
-      <!-- <v-skeleton-loader
-        class="mx-auto border mb-2"
-        type="list-item-two-line"
-      ></v-skeleton-loader> -->
       <div style="display: flex; align-items: center; justify-content: center; color: var(--text-color-dark); border: solid 1px #bfbfbf; border-radius: 10px; overflow: hidden; padding: .5rem; gap: .5rem; margin-block: 1rem;">
         <v-icon icon="mdi-magnify" size="23"></v-icon>
         <input v-model="search" type="text" placeholder="Buscar aqui" style="display: flex;  background-color: var(--bg-color-light);  border: none; outline: none; color: var(--text-color-dark); width: 100%;">
       </div>
-
+      
       <FollowupConfig title="Novo Seguimento" :new="true" :envId="Env._id" :obj="JSON.stringify(followupModel)" />
     </div>
-
+    
     <div class=" my-2 mt-5">
+      
+        <v-skeleton-loader
+          v-if="store.loadFollowups"
+          class="mx-auto mb-2"
+          type="list-item-three-line"
+        ></v-skeleton-loader>
 
-        <v-list-item v-for="followup, index in store.followup" :key="index" style="padding: .8rem .5rem .8rem .8rem; color: var(--text-color-dark); transition: all .2s cubic-bezier(0.075, 0.82, 0.165, 1);" @click="router.push({name:'followup-unique',params:{idFollowup: followup._id}}); store.listAllTasks(followup._id); search = '';" :class="route.params.idFollowup===followup._id ? 'followup-active' : ''" v-show="followup.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())||search===''">
+        <v-list-item v-if="!store.loadFollowups" v-for="followup, index in store.followup" :key="index" style="padding: .8rem .5rem .8rem .8rem; color: var(--text-color-dark); transition: all .2s cubic-bezier(0.075, 0.82, 0.165, 1);" @click="router.push({name:'followup-unique',params:{idFollowup: followup._id}}); store.listAllTasks(followup._id); search = '';" :class="route.params.idFollowup===followup._id ? 'followup-active' : ''" v-show="followup.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())||search===''">
           <v-list-item-title><b>{{ followup.name }}</b></v-list-item-title>
           <p style="color: #8f8f8f; font-size: 14px;">57 registros</p style="color: #efefef;">
 
@@ -94,8 +97,8 @@ const followupModel = {
                   <v-btn v-bind="props" icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
                 </template>
                 <v-list style="padding: 0; margin-left: .3rem;">
-                  <v-list-item append-icon="mdi-content-duplicate" title="Duplicar" style="font-size: 14px;"></v-list-item>
-                  <v-list-item append-icon="mdi-trash-can" title="Excluir" style="font-size: 14px;"></v-list-item>
+                  <v-list-item append-icon="mdi-content-duplicate" @click="" title="Duplicar" style="font-size: 14px;"></v-list-item>
+                  <v-list-item append-icon="mdi-trash-can" @click="" title="Excluir" style="font-size: 14px; color: red;"></v-list-item>
                 </v-list>
               </v-menu>
           </template>

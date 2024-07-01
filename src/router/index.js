@@ -30,11 +30,12 @@ const router = createRouter({
     },
     {
       path: '/ambientes',
-      // name: 'all-env',
+      name: 'envs',
       component: AppView,
       children: [
         {
           path: '',
+          name: 'all-envs',
           component: () => import('../views/AllEnvView.vue'),
         }
       ]
