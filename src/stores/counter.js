@@ -12,7 +12,7 @@ export const useCounterStore = defineStore(
     // Stores do sistema
     const environments = ref([]);
     const followup = ref([]);
-    const tasks = ref([]);
+    const tasks = ref({});
 
     // Loads do sistema
     const loadTasks = ref(false);
@@ -32,7 +32,13 @@ export const useCounterStore = defineStore(
       user.value = {};
       environments.value = [];
       followup.value = [];
-      tasks.value = [];
+      tasks.value = {};
+    }
+
+    function removeParamsURL(url) {
+      const urlObj = new URL(url);
+      urlObj.search = '';
+      window.history.replaceState({}, '', urlObj.toString());
     }
 
     // Funções de store
@@ -95,7 +101,7 @@ export const useCounterStore = defineStore(
           })
           .then(function (response) {
             if (response.data.success) {
-              tasks.value = response.data.data;
+              tasks.value[`${followup}`] = response.data.data;
             }
             loadTasks.value = false;
           })
@@ -167,6 +173,7 @@ export const useCounterStore = defineStore(
       tasks,
       login,
       logout,
+      removeParamsURL,
       listAllEnvironment,
       loadEnvironments,
       listAllFollowup,

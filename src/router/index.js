@@ -22,7 +22,14 @@ const router = createRouter({
             {
               path: 'seguimento/:idFollowup',
               name: 'followup-unique',
-              component: () => import('../views/FollowupView.vue')
+              component: () => import('../views/FollowupView.vue'),
+              children: [
+                {
+                  path: 'registro/:idTask',
+                  name: 'task-unique',
+                  component: () => import('../components/popup/TaskConfig.vue')
+                }
+              ]
             },
           ]
         }

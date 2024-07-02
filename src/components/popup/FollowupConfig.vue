@@ -4,7 +4,10 @@ import { useCounterStore } from '../../stores/counter.js'
 import draggable from 'vuedraggable'
 import BtnAddSimple from '../standard/BtnAddSimple.vue';
 import InputText from '../standard/InputText.vue';
+import { useRoute, useRouter } from 'vue-router';
 // const emits = defineEmits({});
+const route = useRoute();
+const router = useRouter();
 const props = defineProps({
   envId: {
     type: String,
@@ -47,32 +50,6 @@ const dragOptions = computed(() => {
 });
 
 
-// const followupModel = !props.followupId ? {
-//   codigo: null,
-//   name: "",
-// 	phases: [
-// 		{
-// 			id: "1",
-// 			title: "Primeira Etapa",
-// 			color: "#ededed",
-// 			visible: true
-// 		},
-// 		{
-// 			id: "2",
-// 			title: "Segunda Etapa",
-// 			color: "#ededed",
-// 			visible: true
-// 		},
-// 		{
-// 			id: "3",
-// 			title: "Terceira Etapa",
-// 			color: "#ededed",
-// 			visible: true
-// 		}
-// 	],
-//   environment_id: props.envId ? props.envId : null,
-// } : store.followup.filter(f=>f._id===props.followupId)[0]
-
 const followupOrigin = props.obj;
 const followup = ref(JSON.parse(props.obj));
 
@@ -95,10 +72,9 @@ function closeDialog() {
   } else {
     dialogConfirm.value = false;
     messageConfirm.value = "";
-    setTimeout(()=>{
-      dialog.value = false; 
-      followup.value = JSON.parse(followupOrigin);
-    }, 400)
+    dialog.value = false; 
+    followup.value = JSON.parse(followupOrigin);
+    tab.value = "phases";
   }
 }
   
@@ -111,11 +87,11 @@ function closeDialog() {
         <v-icon icon="mdi-plus"></v-icon>
         <h4>Novo Seguimento</h4>
     </v-btn>
-    <v-btn v-else icon="mdi-cog" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);" @click="dialog = true"></v-btn>
+    <v-btn v-else icon="mdi-cog" size="38" variant="elevated" style="border-radius: 10px; color: var(--text-color-dark);" @click="dialog = true"></v-btn>
 
     <!-- Popup Confirm -->
     <v-dialog v-model="dialogConfirm" width="auto" persistent>
-      <v-card max-width="350">
+      <v-card max-width="350" style="border-radius: 20px;">
         <v-banner style="font-size: 15px; width: 100%; color: var(--text-color-dark);">
           <template v-slot:prepend>
             <v-icon size="40">mdi-weather-cloudy-clock</v-icon>
@@ -130,17 +106,17 @@ function closeDialog() {
     </v-dialog>
 
     <!-- Popup principal -->
-    <v-dialog v-model="dialog" width="auto" persistent>
-      <v-card style="color: var(--text-color); height: 500px; width: 900px; align-self: center; ">
+    <v-dialog v-model="dialog" style="padding: 0; margin: 0;" persistent>
+      <v-card style="display: flex; height: 100vh; width: 100%; border-radius: 20px; color: var(--text-color-dark); align-self: center; ">
         <!-- Titulo/Header do Popup -->
-        <v-card-title elevation="3" style="display: flex; align-items: center; justify-content: space-between; padding: .2rem .5rem .2rem .5rem; background-color: var(--bg-color-gray); color: var(--text-color-dark); box-shadow: 0 0 5px #939393;" >
+        <v-card-title elevation="3" style="display: flex; align-items: center; justify-content: space-between; padding: .2rem .5rem .2rem .5rem; background-color: var(--bg-color-gray); color: var(--primary-color); box-shadow: 0 0 5px #939393;" >
             <h4>{{ title }}</h4>
             <span>
               <v-btn v-show="verify" class="me-2 text-none" :text="newFollowup?'Salvar':'Salvar alterações'" :color="newFollowup?'#00b5d9':'warning'" prepend-icon="mdi-check" variant="tonal" density="comfortable" style="border-radius: 10px; margin-right: .5rem; border: solid 1px;"></v-btn>
-              <v-btn icon="mdi-close" variant="text" density="comfortable" style="border-radius: 10px; color: var(--text-color-dark);" @click="closeDialog"></v-btn>
+              <v-btn icon="mdi-close" variant="text" density="comfortable" style="border-radius: 10px; color: var(--primary-color);" @click="closeDialog"></v-btn>
             </span>
         </v-card-title>
-
+        
         <!-- Content -->
         <v-card-text style="display: flexbox; gap: 1rem; padding: 1rem; height: 100%; overflow: hidden;">
 
@@ -148,11 +124,11 @@ function closeDialog() {
 
             <v-col cols="12" sm="4" style="padding: 0;">
               <v-row dense>
-                <v-col cols="12" sm="12">
+                <!-- <v-col cols="12" sm="12">
                   <InputText v-model="followup.codigo" text="Código" :required="false" />
-                </v-col>
+                </v-col> -->
                 <v-col cols="12" sm="12">
-                  <InputText v-model="followup.name" text="Nome *" :required="true" />
+                  <InputText density="comfortable" :single_line="true" v-model="followup.name" text="Nome *" :required="true" />
                 </v-col>
               </v-row>
             </v-col>
@@ -162,10 +138,14 @@ function closeDialog() {
 
                 <v-tabs
                   v-model="tab"
-                  style="color: var(--text-color-dark); background-color: var(--bg-color-gray);"
+                  style="color: var(--text-color-dark); background-color: var(--bg-color-gray); color: var(--primary-color);"
                 >
                   <v-tab value="phases" ><button style="font-size: 16px; font-weight: 600;">Etapas</button></v-tab>
-                  <v-tab value="properties"  ><button style="font-size: 16px; font-weight: 600;">Propriedades</button></v-tab>
+                  <v-tab  value="properties"  ><button style="font-size: 16px; font-weight: 600;">Propriedades</button></v-tab>
+                  <template v-slot:window>
+                    <!-- <v-btn class="mr-3" size="38" icon="mdi-plus" variant="elevated" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn> -->
+                     
+                  </template>
                 </v-tabs>
   
                 <v-window v-model="tab" style="height: 90%; overflow-y: auto;">
@@ -228,8 +208,8 @@ function closeDialog() {
 
 
         <!-- Footer -->
-        <!-- <v-divider></v-divider>
-        <v-card-actions>
+        <!-- <v-divider></v-divider> -->
+        <!-- <v-card-actions>
           <v-spacer></v-spacer>
         </v-card-actions> -->
 

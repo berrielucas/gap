@@ -71,9 +71,8 @@ const followupModel = {
 
     <div class="px-2 my-2 mt-5">
 
-      <div style="display: flex; align-items: center; justify-content: center; color: var(--text-color-dark); border: solid 1px #bfbfbf; border-radius: 10px; overflow: hidden; padding: .5rem; gap: .5rem; margin-block: 1rem;">
-        <v-icon icon="mdi-magnify" size="23"></v-icon>
-        <input v-model="search" type="text" placeholder="Buscar aqui" style="display: flex;  background-color: var(--bg-color-light);  border: none; outline: none; color: var(--text-color-dark); width: 100%;">
+      <div class="mr-3 m1-4 mb-4" style="display: flex; color: var(--text-color-dark); width: 100%; border: solid 1px #bfbfbf; border-radius: 14px; overflow: hidden;">
+          <v-text-field v-model="search" density="compact" label="Buscar aqui" variant="solo" single-line hide-details append-inner-icon="mdi-magnify"></v-text-field>
       </div>
       
       <FollowupConfig title="Novo Seguimento" :new="true" :envId="Env._id" :obj="JSON.stringify(followupModel)" />

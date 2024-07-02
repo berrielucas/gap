@@ -41,8 +41,8 @@ const props = defineProps({
         <v-list-item style=" flex-grow: 1; margin: 0; padding: 0 0.3rem 0 0.7rem">
           <v-list-item-title class="h4">{{ title }}</v-list-item-title>
           <template v-slot:append>
-            <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark)"></v-btn>
-            <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark)"></v-btn>
+            <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
+            <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
           </template>
         </v-list-item>
       </div>
@@ -70,10 +70,12 @@ const props = defineProps({
 .etapa-header {
   display: flex;
   height: 45px;
-  background-color: var(--bg-color-gray);
+  /* background-color: var(--bg-color-gray); */
+  background: linear-gradient(30deg, rgba(0,34,55,1) 0%, rgba(1,12,24,1) 30% 70%, rgba(0,34,55,1) 100%);
   align-items: center;
   justify-content: space-between;
-  color: var(--text-color-dark);
+  /* color: var(--text-color-dark); */
+  color: var(--bg-color-gray);
   box-shadow: 0 0 10px #9e9e9e;
   transition: all .5s ease-in-out;
 

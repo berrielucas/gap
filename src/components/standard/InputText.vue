@@ -17,9 +17,14 @@ const props = defineProps({
     type: Boolean,
     required: false
   },
+  single_line: {
+    type: Boolean,
+    required: false
+  },
 })
 const value = ref('');
-const hide = ref(false);
+const hide = ref(props.hide_details?props.hide_details:false);
+const single = ref(props.single_line?props.single_line:false);
 const rules = ref([
   value => {
     if (value) return true
@@ -32,5 +37,5 @@ if (props.modelo!==undefined) {
 </script>
 
 <template>
-    <v-text-field v-model="value" :label="text" required :on-update:model-value="$emit('value', value)" :rules="required?rules:undefined" :hide-details="hide_details?true:false"></v-text-field>
+    <v-text-field :single-line="single?true:false" v-model="value" :label="text" required :on-update:model-value="$emit('value', value)" :rules="required?rules:undefined" :hide-details="hide?true:false"></v-text-field>
 </template>
