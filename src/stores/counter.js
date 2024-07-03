@@ -37,8 +37,8 @@ export const useCounterStore = defineStore(
 
     function removeParamsURL(url) {
       const urlObj = new URL(url);
-      urlObj.search = '';
-      window.history.replaceState({}, '', urlObj.toString());
+      urlObj.search = "";
+      window.history.replaceState({}, "", urlObj.toString());
     }
 
     // Funções de store
@@ -46,9 +46,14 @@ export const useCounterStore = defineStore(
       loadEnvironments.value = true;
       setTimeout(() => {
         axios
-          .post(`${import.meta.env.VITE_URL_BASE_API}/Environment/listAllEnvironment`, {
-            tokenUser: user.value.token,
-          })
+          .post(
+            `${
+              import.meta.env.VITE_URL_BASE_API
+            }/Environment/listAllEnvironment`,
+            {
+              tokenUser: user.value.token,
+            }
+          )
           .then(function (response) {
             if (response.data.success) {
               environments.value = response.data.data;
@@ -73,10 +78,13 @@ export const useCounterStore = defineStore(
       loadFollowups.value = true;
       setTimeout(() => {
         axios
-          .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`, {
-            envId: env,
-            tokenUser: user.value.token,
-          })
+          .post(
+            `${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`,
+            {
+              envId: env,
+              tokenUser: user.value.token,
+            }
+          )
           .then(function (response) {
             if (response.data.success) {
               followup.value = response.data.data;
@@ -124,44 +132,51 @@ export const useCounterStore = defineStore(
     async function dropPhase(ev, id) {
       ev.preventDefault();
       const data = ev.dataTransfer.getData("text");
-      let response = await fetch(`${import.meta.env.VITE_URL_BASE_API}/Task/updatePhaseTask`, {
-        method: "PUT",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        redirect: "follow",
-        body: JSON.stringify({
-          taskId: data,
-          dataTask: {
-            phase_id: id,
+      let response = await fetch(
+        `${import.meta.env.VITE_URL_BASE_API}/Task/updatePhaseTask`,
+        {
+          method: "PUT",
+          mode: "cors",
+          cache: "no-cache",
+          headers: {
+            "Content-Type": "application/json",
           },
-          tokenUser: user.value.token,
-        }),
-      });
+          redirect: "follow",
+          body: JSON.stringify({
+            taskId: data,
+            dataTask: {
+              phase_id: id,
+            },
+            tokenUser: user.value.token,
+          }),
+        }
+      );
       if (response.ok) {
-        document.getElementById(id).querySelector(`#etapa-cards-${id}`).appendChild(document.getElementById(data));
-        // document.querySelectorAll(".model-task").forEach((element) => {
-        //   element.style.display = "none";
-        // });
+        document
+          .getElementById(id)
+          .querySelector(`#etapa-cards-${id}`)
+          .appendChild(document.getElementById(data));
       }
     }
 
     let enterId = null;
     let leaveId = null;
-    function dragEnter(ev, id){
+    function dragEnter(ev, id) {
       enterId = id;
-      document.getElementById(id).querySelector(".model-task").style.display = 'flex';
-      if (id!==leaveId&&leaveId!==null) {
-        document.getElementById(leaveId).querySelector(".model-task").style.display = 'none';
+      document.getElementById(id).querySelector(".model-task").style.display =
+        "flex";
+      if (id !== leaveId && leaveId !== null) {
+        document
+          .getElementById(leaveId)
+          .querySelector(".model-task").style.display = "none";
       }
     }
 
-    function dragLeave(ev, id){
+    function dragLeave(ev, id) {
       leaveId = id;
-      if (ev.target.id===id&&enterId!==id) {
-        document.getElementById(id).querySelector(".model-task").style.display = 'none';
+      if (ev.target.id === id && enterId !== id) {
+        document.getElementById(id).querySelector(".model-task").style.display =
+          "none";
       }
     }
 
@@ -184,7 +199,7 @@ export const useCounterStore = defineStore(
       dropPhase,
       allowDropPhase,
       dragEnter,
-      dragLeave
+      dragLeave,
     };
   },
   { persist: true }

@@ -26,28 +26,26 @@ const props = defineProps({
 </script>
 
 <template>
-  <div
-    :id="id"
-    :class="id"
-    @drop="store.dropPhase($event, id)"
-    @dragenter="store.dragEnter($event, id)"
-    @dragleave="store.dragLeave($event, id)"
-    @dragover="store.allowDropPhase($event)"
-    style="height: 100%; position: relative"
-  >
+  <div :id="id" :class="id" @drop="store.dropPhase($event, id)" @dragenter="store.dragEnter($event, id)"
+    @dragleave="store.dragLeave($event, id)" @dragover="store.allowDropPhase($event)"
+    style="height: 100%; position: relative">
     <v-card :id="`etapa-${id}`" elevation="10" class="etapa">
       <div :id="`etapa-header-${id}`" class="etapa-header">
         <v-progress-circular v-if="store.loadTasks" class="ml-2" indeterminate :size="25"></v-progress-circular>
         <v-list-item style=" flex-grow: 1; margin: 0; padding: 0 0.3rem 0 0.7rem">
           <v-list-item-title class="h4">{{ title }}</v-list-item-title>
           <template v-slot:append>
-            <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
-            <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
+            <v-btn icon="mdi-plus" variant="text" density="compact"
+              style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
+            <v-btn icon="mdi-dots-vertical" variant="text" density="compact"
+              style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
           </template>
         </v-list-item>
       </div>
       <section v-if="!store.loadTasks" :id="`etapa-cards-${id}`" class="etapa-cards">
-        <CardTask v-for="(task, index) in tasks" :key="index" v-show="task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())" :id="task._id" :content="JSON.stringify(task)" />
+        <CardTask v-for="(task, index) in tasks" :key="index"
+          v-show="task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())" :id="task._id"
+          :content="JSON.stringify(task)" />
       </section>
       <div :id="`model-${id}`" class="model-task"></div>
     </v-card>
@@ -71,7 +69,7 @@ const props = defineProps({
   display: flex;
   height: 45px;
   /* background-color: var(--bg-color-gray); */
-  background: linear-gradient(30deg, rgba(0,34,55,1) 0%, rgba(1,12,24,1) 30% 70%, rgba(0,34,55,1) 100%);
+  background: linear-gradient(30deg, rgba(0, 34, 55, 1) 0%, rgba(1, 12, 24, 1) 30% 70%, rgba(0, 34, 55, 1) 100%);
   align-items: center;
   justify-content: space-between;
   /* color: var(--text-color-dark); */
@@ -102,9 +100,11 @@ const props = defineProps({
   width: 5px;
   height: 6px;
 }
+
 .etapa-cards::-webkit-scrollbar-track {
   background-color: transparent;
 }
+
 .etapa-cards::-webkit-scrollbar-thumb {
   background-color: var(--scroll-color-thumb);
   border-radius: 20px;

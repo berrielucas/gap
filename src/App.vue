@@ -9,11 +9,9 @@ import { RouterView } from 'vue-router'
 </template>
 
 <style>
-
-#body{
+#body {
   /* display: flex; */
   height: 100dvh;
   overflow: hidden;
 }
-
 </style>

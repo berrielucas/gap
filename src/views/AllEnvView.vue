@@ -19,45 +19,57 @@ const search = ref("");
       <v-row dense>
 
         <v-col cols="12" sm="12">
-            <v-card class="header-all-env" elevation="3">
-              <v-progress-circular v-if="store.loadEnvironments" class="ml-2" indeterminate :size="25"></v-progress-circular>
-                <v-list-item class="pl-3" style="flex-grow: 1; margin: 0; padding: 0;">
-                    <v-list-item-title style="font-size: large;">Meus ambientes</v-list-item-title>
-                    <template v-slot:append>
-                      
-                      <v-btn class="mr-3" icon="mdi-sync" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);" @click="store.listAllEnvironment();" ></v-btn>
-                      
-                      <v-btn class="mr-3"icon="mdi-filter-variant" variant="text" density="compact" style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+          <v-card class="header-all-env" elevation="3">
+            <v-progress-circular v-if="store.loadEnvironments" class="ml-2" indeterminate
+              :size="25"></v-progress-circular>
+            <v-list-item class="pl-3" style="flex-grow: 1; margin: 0; padding: 0;">
+              <v-list-item-title style="font-size: large;">Meus ambientes</v-list-item-title>
+              <template v-slot:append>
 
-                      <div style="display: flex; color: var(--text-color-dark); width: 200px; border: solid 1px #bfbfbf; border-radius: 14px; overflow: hidden;">
-                        <v-text-field v-model="search" density="compact" label="Buscar aqui" variant="solo" single-line hide-details append-inner-icon="mdi-magnify"></v-text-field>
-                      </div>
+                <v-btn class="mr-3" icon="mdi-sync" variant="text" density="compact"
+                  style="border-radius: 10px; color: var(--text-color-dark);"
+                  @click="store.listAllEnvironment();"></v-btn>
 
-                    </template>
-                </v-list-item>
-            </v-card>
+                <v-btn class="mr-3" icon="mdi-filter-variant" variant="text" density="compact"
+                  style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+
+                <div
+                  style="display: flex; color: var(--text-color-dark); width: 200px; border: solid 1px #bfbfbf; border-radius: 14px; overflow: hidden;">
+                  <v-text-field v-model="search" density="compact" label="Buscar aqui" variant="solo" single-line
+                    hide-details append-inner-icon="mdi-magnify"></v-text-field>
+                </div>
+
+              </template>
+            </v-list-item>
+          </v-card>
         </v-col>
 
-        <v-col v-if="!store.loadEnvironments" cols="12" sm="4" v-for="(env, index) in store.environments" :key="index" v-show="env.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())||search===''">
+        <v-col v-if="!store.loadEnvironments" cols="12" sm="4" v-for="(env, index) in store.environments" :key="index"
+          v-show="env.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) || search === ''">
           <div class="env-item mb-3 mr-1 ml-1">
             <v-list-item style="padding: 0; margin: 0">
-              <v-list-item-title style="font-size: 20px; font-weight: 600; color: gray">{{ env.name }}</v-list-item-title>
+              <v-list-item-title style="font-size: 20px; font-weight: 600; color: gray">{{ env.name
+                }}</v-list-item-title>
               <template v-slot:append>
                 <div class="status-env ml-2" :style="env.active ? '--color-status: green;' : '--color-status: red;'">
                   <span>{{ env.active ? "Ativo" : "Desativado" }}</span>
                 </div>
               </template>
             </v-list-item>
-            <p style="font-size: 15px; font-style: italic; font-weight: 600; color: gray; opacity: 0.7; position: absolute; left: 0.8rem; bottom: 0.8rem">
+            <p
+              style="font-size: 15px; font-style: italic; font-weight: 600; color: gray; opacity: 0.7; position: absolute; left: 0.8rem; bottom: 0.8rem">
               Criado em {{ new Date(env.createAt).toLocaleString() }}
             </p>
-            <v-btn @click="router.push(`/${env.url}/`);" class="btn-acess" style="" icon="mdi-arrow-top-right" size="30"></v-btn>
+            <v-btn @click="router.push(`/${env.url}/`);" class="btn-acess" style="" icon="mdi-arrow-top-right"
+              size="30"></v-btn>
           </div>
         </v-col>
 
         <v-col v-if="!store.loadEnvironments" cols="12" sm="4">
           <v-list-item @click="" class="env-new mb-3 mr-1 ml-1">
-            <h3 style="display: flex; gap: 0.3rem; align-items: center"><v-icon style="display: flex">mdi-plus-thick</v-icon> Novo Ambiente</h3>
+            <h3 style="display: flex; gap: 0.3rem; align-items: center"><v-icon
+                style="display: flex">mdi-plus-thick</v-icon>
+              Novo Ambiente</h3>
           </v-list-item>
         </v-col>
       </v-row>
@@ -69,15 +81,17 @@ const search = ref("");
 .main-all-env::-webkit-scrollbar {
   width: 7px;
 }
+
 .main-all-env::-webkit-scrollbar-track {
   background-color: transparent;
 }
+
 .main-all-env::-webkit-scrollbar-thumb {
   background-color: var(--scroll-color-thumb);
   border-radius: 20px;
 }
 
-.header-all-env{
+.header-all-env {
   display: flex;
   align-items: center;
   color: var(--text-color-dark);
