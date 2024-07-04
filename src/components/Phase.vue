@@ -1,8 +1,11 @@
 <script setup>
 import { ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useCounterStore } from "@/stores/counter";
-const store = useCounterStore();
 import CardTask from "./CardTask.vue";
+const store = useCounterStore();
+const router = useRouter();
+const route = useRoute();
 
 const props = defineProps({
   id: {
@@ -36,7 +39,7 @@ const props = defineProps({
           <v-list-item-title class="h4">{{ title }}</v-list-item-title>
           <template v-slot:append>
             <v-btn icon="mdi-plus" variant="text" density="compact"
-              style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
+              style="border-radius: 10px; color: var(--bg-color-gray);" @click="store.createTask(router, route.params.idFollowup, id)" ></v-btn>
             <v-btn icon="mdi-dots-vertical" variant="text" density="compact"
               style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
           </template>

@@ -120,6 +120,66 @@ export const useCounterStore = defineStore(
       }, 1000);
     }
 
+    function createTask(router, idFollowup, idPhase) {
+      axios
+        .post(`${import.meta.env.VITE_URL_BASE_API}/Task/createTask`, {
+          title: "Nova Tarefa",
+          description: "",
+          followup_id: idFollowup,
+          phase_id: idPhase,
+          tokenUser: user.value.token,
+        })
+        .then(function (response) {
+          if (response.data.success) {
+            const taskCreated = response.data.data;
+            tasks.value[`${idFollowup}`].push(taskCreated);
+            router.push({ name: 'task-unique', params: { idTask: taskCreated._id } });
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    function updateTask(idTask, data, idFollowup, router) {
+      axios
+        .put(`${import.meta.env.VITE_URL_BASE_API}/Task/updateTask`, {
+          taskId: idTask,
+          dataTask: data,
+          followup_id: idFollowup,
+          tokenUser: user.value.token,
+        })
+        .then(function (response) {
+          if (response.data.success) {
+            // const taskUpdated = response.data.data;
+            // tasks.value[`${idFollowup}`].push(taskUpdated);
+            router.push({ name: 'followup-unique', params: { idFollowup: idFollowup } });
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    function deleteTask(idTask, idFollowup) {
+      axios
+        .post(`${import.meta.env.VITE_URL_BASE_API}/Task/deleteTask`, {
+          taskId: idTask,
+          followup_id: idFollowup,
+          tokenUser: user.value.token,
+        })
+        .then(function (response) {
+          if (response.data.success) {
+            const taskRemove = response.data.data;
+            tasks.value[`${idFollowup}`] = tasks.value[`${idFollowup}`].filter(t=>t._id!==taskRemove._id);
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+
     // Funções Drag and Drop
     function allowDropPhase(ev) {
       ev.preventDefault();
@@ -193,6 +253,9 @@ export const useCounterStore = defineStore(
       loadEnvironments,
       listAllFollowup,
       loadFollowups,
+      createTask,
+      updateTask,
+      deleteTask,
       listAllTasks,
       loadTasks,
       dragTask,

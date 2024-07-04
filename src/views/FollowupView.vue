@@ -1,17 +1,19 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter, RouterView, onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router';
+import { useCounterStore } from '../stores/counter.js'
 // import axios from "axios";
 import Phase from "@/components/Phase.vue";
 import FollowupConfig from "@/components/popup/FollowupConfig.vue";
 import Filter from '@/components/Filter.vue';
-import { useCounterStore } from '../stores/counter.js'
-const store = useCounterStore();
-// const router = useRouter();
-const route = useRoute();
-store.listAllTasks(route.params.idFollowup);
 
+const store = useCounterStore();
+const router = useRouter();
+const route = useRoute();
 const search_task = ref("");
+const modelFollowup = ref(store.followup.filter(p => p._id === route.params.idFollowup)[0]);
+
+store.listAllTasks(route.params.idFollowup);
 
 onBeforeRouteUpdate(() => {
     setTimeout(() => {
@@ -32,7 +34,7 @@ onBeforeRouteUpdate(() => {
             <v-card elevation="0" class="header" style="border-radius: 10px;">
                 <v-list-item style="width: 100%; margin: 0; padding: 0 .7rem;">
                     <v-list-item-title class="title-followup">{{
-                        store.followup.filter(p => p._id === route.params.idFollowup)[0].name }}</v-list-item-title>
+                        modelFollowup.name }}</v-list-item-title>
                     <template v-slot:append>
                         <v-btn :loading="store.loadTasks" class="mr-3" size="38" icon="mdi-sync" variant="elevated"
                             style="border-radius: 10px; color: var(--text-color-dark);"
@@ -43,7 +45,7 @@ onBeforeRouteUpdate(() => {
                         </v-btn>
 
                         <v-btn class="mr-3" size="38" icon="mdi-plus" variant="elevated"
-                            style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
+                            style="border-radius: 10px; color: var(--text-color-dark);" @click="store.createTask(router, route.params.idFollowup, modelFollowup.phases[0].id)" ></v-btn>
 
                         <v-btn class="mr-3" size="38" icon="mdi-filter-variant" variant="elevated"
                             style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
@@ -60,7 +62,7 @@ onBeforeRouteUpdate(() => {
 
                         <FollowupConfig title="Configurações do seguimento" :new="false"
                             :followupId="route.params.idFollowup"
-                            :obj="JSON.stringify(store.followup.filter(f => f._id === route.params.idFollowup)[0])" />
+                            :obj="JSON.stringify(modelFollowup)" />
                     </template>
                 </v-list-item>
             </v-card>
