@@ -88,6 +88,11 @@ export const useCounterStore = defineStore(
           .then(function (response) {
             if (response.data.success) {
               followup.value = response.data.data;
+              if (JSON.stringify(tasks.value)==="{}") {
+                followup.value.forEach(element => {
+                  tasks.value[`${element._id}`] = [];
+                });
+              }
             }
             loadFollowups.value = false;
           })
@@ -105,6 +110,7 @@ export const useCounterStore = defineStore(
         axios
           .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/listAllTasks`, {
             followupId: followup,
+            limit: 100,
             tokenUser: user.value.token,
           })
           .then(function (response) {
@@ -120,6 +126,22 @@ export const useCounterStore = defineStore(
       }, 1000);
     }
 
+    function getTask(task, followup) {
+      axios
+        .post(`${import.meta.env.VITE_URL_BASE_API}/Task/getTask`, {
+          taskId: task,
+          tokenUser: user.value.token,
+        })
+        .then(function (response) {
+          if (response.data.success) {
+            tasks.value[`${followup}`][tasks.value[`${followup}`].indexOf(tasks.value[`${followup}`].filter(t=>t._id===task)[0])] = response.data.data;
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
     function createTask(router, idFollowup, idPhase) {
       axios
         .post(`${import.meta.env.VITE_URL_BASE_API}/Task/createTask`, {
@@ -132,7 +154,8 @@ export const useCounterStore = defineStore(
         .then(function (response) {
           if (response.data.success) {
             const taskCreated = response.data.data;
-            tasks.value[`${idFollowup}`].push(taskCreated);
+            tasks.value[`${idFollowup}`].unshift(taskCreated);
+            followup.value.filter(f=>f._id===idFollowup)[0].countTasks += 1;
             router.push({ name: 'task-unique', params: { idTask: taskCreated._id } });
           }
         })
@@ -172,6 +195,7 @@ export const useCounterStore = defineStore(
           if (response.data.success) {
             const taskRemove = response.data.data;
             tasks.value[`${idFollowup}`] = tasks.value[`${idFollowup}`].filter(t=>t._id!==taskRemove._id);
+            followup.value.filter(f=>f._id===idFollowup)[0].countTasks -= 1;
           }
         })
         .catch(function (error) {
@@ -189,7 +213,7 @@ export const useCounterStore = defineStore(
       ev.dataTransfer.setData("text", ev.target.id);
     }
 
-    async function dropPhase(ev, id) {
+    async function dropPhase(ev, id, followupId) {
       ev.preventDefault();
       const data = ev.dataTransfer.getData("text");
       let response = await fetch(
@@ -212,10 +236,12 @@ export const useCounterStore = defineStore(
         }
       );
       if (response.ok) {
-        document
-          .getElementById(id)
-          .querySelector(`#etapa-cards-${id}`)
-          .appendChild(document.getElementById(data));
+        // document
+        //   .getElementById(id)
+        //   .querySelector(`#etapa-cards-${id}`)
+        //   .appendChild(document.getElementById(data));
+        // tasks.value[`${followupId}`].filter(t=>t._id===data)[0].phase_id = id;
+        getTask(data, followupId);
       }
     }
 
@@ -253,6 +279,7 @@ export const useCounterStore = defineStore(
       loadEnvironments,
       listAllFollowup,
       loadFollowups,
+      getTask,
       createTask,
       updateTask,
       deleteTask,

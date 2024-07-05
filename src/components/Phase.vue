@@ -29,7 +29,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div :id="id" :class="id" @drop="store.dropPhase($event, id)" @dragenter="store.dragEnter($event, id)"
+  <div :id="id" :class="id" @drop="store.dropPhase($event, id, route.params.idFollowup)" @dragenter="store.dragEnter($event, id)"
     @dragleave="store.dragLeave($event, id)" @dragover="store.allowDropPhase($event)"
     style="height: 100%; position: relative">
     <v-card :id="`etapa-${id}`" elevation="10" class="etapa">
@@ -46,7 +46,7 @@ const props = defineProps({
         </v-list-item>
       </div>
       <section v-if="!store.loadTasks" :id="`etapa-cards-${id}`" class="etapa-cards">
-        <CardTask v-for="(task, index) in tasks" :key="index"
+        <CardTask v-for="(task, index) in tasks" :key="task._id"
           v-show="task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())" :id="task._id"
           :content="JSON.stringify(task)" />
       </section>
@@ -61,8 +61,8 @@ const props = defineProps({
   max-height: 100%;
   display: flex;
   flex-direction: column;
-  min-width: 290px;
-  max-width: 290px;
+  min-width: 300px;
+  max-width: 300px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(5px);
   border-radius: 10px;

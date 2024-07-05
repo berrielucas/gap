@@ -4,18 +4,20 @@ import { useCounterStore } from '../../stores/counter.js'
 import BtnAddSimple from '../standard/BtnAddSimple.vue';
 import InputText from '../standard/InputText.vue';
 import { useRoute, useRouter } from 'vue-router';
-const route = useRoute();
-const router = useRouter();
-
 
 // Configs
+const route = useRoute();
+const router = useRouter();
 const store = useCounterStore();
 const dialog = ref(true);
+const dialogConfirm = ref(false);
 
+// onMounted(()=>{
+//   store.getTask(route.params.idTask, route.params.idFollowup);
+// });
 
 const task = ref(store.tasks[`${route.params.idFollowup}`].filter(t => t._id === route.params.idTask)[0]);
 const modelTaskOrigin = JSON.stringify(store.tasks[`${route.params.idFollowup}`].filter(t => t._id === route.params.idTask)[0]);
-
 
 function closeTask() {
   if (modelTaskOrigin!==JSON.stringify(task.value)) {
@@ -51,7 +53,7 @@ function removeSubTask(idx) {
 
 function addSubTask() {
     task.value.subTasks.unshift({
-      id: `${store.user._id}.${Date.now()}`,
+      id: `${task.value.subTasks.length+1}.${store.user._id}.${Date.now()}`,
       title: `Subtarefa ${task.value.subTasks.length+1}`,
       complete: false
     });
@@ -62,6 +64,23 @@ function addSubTask() {
 
 
 <template>
+
+  <v-dialog v-model="dialogConfirm" width="auto" persistent>
+    <v-card max-width="350" style="border-radius: 20px;">
+      <v-banner style="font-size: 15px; width: 100%; color: var(--text-color-dark);">
+        <template v-slot:prepend>
+          <v-icon size="40">mdi-alert</v-icon>
+        </template>
+        <p>Deseja realmente excluir a tarefa <b>{{ task.title }}</b></p>
+      </v-banner>
+      <template v-slot:actions>
+        <v-btn density="comfortable" class="ms-auto text-none" text="Cancelar"
+          style="border-radius: 5px; border: solid 1px;" @click="dialogConfirm = false"></v-btn>
+        <v-btn class="me-2 text-none" text="Excluir" color="error" variant="tonal" density="comfortable"
+          style="border-radius: 5px; " @click="deleteTask(); dialogConfirm=false;"></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 
   <!-- Popup principal -->
   <v-dialog v-model="dialog" style="padding: 0; margin: 0; width: auto;" persistent>
@@ -119,7 +138,8 @@ function addSubTask() {
                 <div style="width: 100%;">
                   <h3 class="mt-2 ml-4 mb-3"
                     style="color: #aaaaaa; font-weight: 400; display: flex; align-items: center;">
-                    <b>Sub Tarefas</b> <v-btn @click="addSubTask()" variant="text" density="compact" icon="mdi-plus" class="ml-auto mr-4"></v-btn>
+                    <b>Sub Tarefas</b>
+                    <v-btn @click="addSubTask()" variant="text" density="compact" icon="mdi-plus" class="ml-auto mr-4"></v-btn>
                   </h3>
 
                   <v-card elevation="0" style="background-color: transparent;">
@@ -198,7 +218,7 @@ function addSubTask() {
           <v-col cols="12" sm="4"
             style="display: flex; flex-direction: column; border-left: solid 1px #dedede; max-height: 100%; width: 100%; overflow-y: auto;">
 
-            <v-btn class="text-none mr-3 mb-3" @click="deleteTask()" append-icon="mdi-trash-can" text="Excluir" variant="tonal"
+            <v-btn class="text-none ml-auto mr-3 mb-3" @click="dialogConfirm=true;" append-icon="mdi-trash-can" text="Excluir" variant="tonal"
                 style="display: flex; border-radius: 10px; color: red; font-size: 15px; "></v-btn>
 
             <!-- Definições -->

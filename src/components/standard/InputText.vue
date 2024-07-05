@@ -3,7 +3,7 @@ import { ref } from 'vue';
 const props = defineProps({
   text: {
     type: String,
-    required: true
+    required: false
   },
   modelo: {
     type: String,
@@ -37,5 +37,5 @@ if (props.modelo!==undefined) {
 </script>
 
 <template>
-    <v-text-field :single-line="single?true:false" v-model="value" :label="text" required :on-update:model-value="$emit('value', value)" :rules="required?rules:undefined" :hide-details="hide?true:false"></v-text-field>
+    <v-text-field :single-line="single?true:false" v-model="value" :label="text || ''" required :on-update:model-value="$emit('value', value)" :rules="required?rules:undefined" :hide-details="hide?true:false"></v-text-field>
 </template>

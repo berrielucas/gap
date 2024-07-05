@@ -37,7 +37,7 @@ const store = useCounterStore();
 const dialog = ref(false);
 const dialogConfirm = ref(false);
 const messageConfirm = ref("");
-const tab = ref("phases");
+const tab = ref("general");
 const modeColor = ref("hex");
 const drag = ref(false);
 const dragOptions = computed(() => {
@@ -57,12 +57,21 @@ function removeAt(idx) {
   followup.value.phases = followup.value.phases.filter(i => i.id !== idx);
 }
 
+function addPhase() {
+  followup.value.phases.unshift({
+    id: `${followup.value.phases.length+1}.${Date.now}.${store.user._id}`,
+    title: "Nova Etapa",
+    color: "#ededed",
+    visible: true
+  });
+}
+
 
 const verify = computed(() => {
   if (newFollowup.value) {
-    return followup.value.name !== "" ? true : false;
+    return followup.value.name !== "" ? false : true;
   }
-  return followupOrigin !== JSON.stringify(followup.value) ? true : false;
+  return followupOrigin !== JSON.stringify(followup.value) && followup.value.name !== "" ? false : true;
 });
 
 function closeDialog() {
@@ -74,7 +83,7 @@ function closeDialog() {
     messageConfirm.value = "";
     dialog.value = false;
     followup.value = JSON.parse(followupOrigin);
-    tab.value = "phases";
+    tab.value = "general";
   }
 }
 
@@ -111,97 +120,99 @@ function closeDialog() {
     <!-- Popup principal -->
     <v-dialog v-model="dialog" style="padding: 0; margin: 0;" persistent>
       <v-card
-        style="display: flex; max-width: 1300px; max-height: 750px; height: 100vh; width: 100%; border-radius: 20px; color: var(--text-color-dark); align-self: center; ">
+        style="display: flex; max-width: 1000px; max-height: 600px; height: 100vh; width: 100%; border-radius: 20px; color: var(--text-color-dark); align-self: center; ">
         <!-- Titulo/Header do Popup -->
-        <v-card-title elevation="3"
-          style="display: flex; align-items: center; justify-content: space-between; padding: .2rem .5rem .2rem .5rem; background-color: var(--bg-color-gray); color: var(--primary-color); box-shadow: 0 0 5px #939393;">
-          <h4>{{ title }}</h4>
+        <v-card-title
+          style="display: flex; align-items: center; justify-content: space-between; padding: .2rem .5rem .2rem .5rem; background-color: var(--bg-color-gray); color: var(--primary-color); box-shadow: 0 0 5px #939393; z-index: 1000;">
+          <h4>{{ !newFollowup ? title+followup.name : title  }}</h4>
           <span>
-            <v-btn v-show="verify" class="me-2 text-none" :text="newFollowup ? 'Salvar' : 'Salvar alterações'"
-              :color="newFollowup ? '#00b5d9' : 'warning'" prepend-icon="mdi-check" variant="tonal"
-              density="comfortable" style="border-radius: 10px; margin-right: .5rem; border: solid 1px;"></v-btn>
             <v-btn icon="mdi-close" variant="text" density="comfortable"
               style="border-radius: 10px; color: var(--primary-color);" @click="closeDialog"></v-btn>
           </span>
         </v-card-title>
 
+        <v-divider></v-divider>
+
         <!-- Content -->
-        <v-card-text style="display: flexbox; gap: 1rem; padding: 1rem; height: 100%; overflow: hidden;">
+        <v-card-text style="display: flexbox; padding: 0; gap: 1rem; height: 100%; overflow: hidden;">
 
           <div style="display: flex; gap: 1rem; height: 100%; width: 100%; overflow: hidden;">
 
-            <v-col cols="12" sm="4" style="padding: 0;">
-              <v-row dense>
-                <!-- <v-col cols="12" sm="12">
-                  <InputText v-model="followup.codigo" text="Código" :required="false" />
-                </v-col> -->
-                <v-col cols="12" sm="12">
-                  <InputText density="comfortable" :single_line="true" v-model="followup.name" text="Nome *"
-                    :required="true" />
-                </v-col>
-              </v-row>
-            </v-col>
+            
 
-            <div style="display: flexbox; height: 100%; width: 100%;">
+            <div style="display: flexbox; height: 100%; width: 100%; position: relative;">
               <div style="overflow: hidden; height: 100%; width: 100%;">
 
                 <v-tabs v-model="tab"
-                  style="color: var(--text-color-dark); background-color: var(--bg-color-gray); color: var(--primary-color);">
+                  style="position: relative; color: var(--text-color-dark);">
+                  <v-tab value="general"><button style="font-size: 16px; font-weight: 600;">Configurações gerais</button></v-tab>
                   <v-tab value="phases"><button style="font-size: 16px; font-weight: 600;">Etapas</button></v-tab>
-                  <v-tab value="properties"><button
-                      style="font-size: 16px; font-weight: 600;">Propriedades</button></v-tab>
+                  <!-- <v-tab value="properties"><button style="font-size: 16px; font-weight: 600;">Propriedades</button></v-tab> -->
                 </v-tabs>
+                <v-divider></v-divider>
+                <v-window v-model="tab" style="flex-grow: 1; height: 100%; width: 100%;">
 
-                <v-window v-model="tab" style="height: 90%; overflow-y: auto;">
-
-                  <v-window-item value="phases">
+                  <v-window-item value="general">
                     <v-container fluid>
 
-                      <draggable tag="ul" class="list-group" handle=".handle" item-key="id" :list="followup.phases"
-                        v-bind="dragOptions" @start="drag = true" @end="drag = false">
-                        <template #item="{ element }">
-                          <li class="list-group-item">
-                            <v-icon class="handle" icon="mdi-swap-vertical"></v-icon>
-                            <div style="overflow-y: hidden; width: 100%;">
-                              <v-text-field density="comfortable" variant="solo" hide-details
-                                v-model="element.title"></v-text-field>
-                            </div>
+                      <v-col cols="12" sm="4" style="padding: 0;">
+                        <v-row dense>
+                          <v-col cols="12" sm="12">
+                            <InputText v-model="followup.name" text="Nome *"
+                              :required="true" />
+                          </v-col>
+                        </v-row>
+                      </v-col>
 
-                            <!-- <v-menu transition="slide-y-transition" :close-on-content-click="false">
-                              <template v-slot:activator="{ props }">
-                                <v-avatar :color="element.color" size="23"v-bind="props" style="margin-right: .5rem;"></v-avatar>
-                              </template>
-                    <v-list
-                      style="margin: .5rem .3rem 0 -.3rem; padding: 0; background-color: var(--bg-color-dark); color: var(--text-color-light);">
-                      <v-color-picker v-model:mode="modeColor" v-model="element.color"></v-color-picker>
-                    </v-list>
-                    </v-menu> -->
-
-                            <v-btn class="trash" :icon="element.visible ? 'mdi-eye' : 'mdi-eye-off'" variant="text"
-                              density="compact"
-                              style="border-radius: 10px; color: var(--text-color-dark); font-size: 14px; margin-right: .3rem;"
-                              @click="element.visible = !element.visible"></v-btn>
-
-                            <v-btn class="trash" icon="mdi-trash-can" variant="text" density="compact"
-                              style="border-radius: 10px; color: var(--text-color-dark); margin-right: .5rem; font-size: 14px;"
-                              @click="removeAt(element.id)"></v-btn>
-
-                          </li>
-                        </template>
-                      </draggable>
                     </v-container>
                   </v-window-item>
 
+                  <v-window-item value="phases" style="height: 90%; width: 100%; overflow-y: auto;">
+                    <v-container fluid>
+                        <p v-if="followup.phases.length>0" class="mt-3" style="text-align: center; color: #a7a7a7; font-size: large;"><b>Organize ou crie etapas para seu seguimento</b></p>
+                        <p v-else class="mt-3" style="text-align: center; color: #a7a7a7; font-size: large;"><b>É necessário criar ao menos uma etapa</b></p>
+                        <draggable tag="ul" class="list-group mt-4" handle=".handle" item-key="id" :list="followup.phases"
+                          v-bind="dragOptions" @start="drag = true" @end="drag = false">
+                          <template #item="{ element }">
+                            <li class="list-group-item">
+                              <v-icon class="handle" icon="mdi-swap-vertical"></v-icon>
+                              <div style="overflow-y: hidden; width: 100%;">
+                                <v-text-field density="comfortable" variant="solo" hide-details
+                                  v-model="element.title"></v-text-field>
+                              </div>
+  
+                              <v-btn class="trash" :icon="element.visible ? 'mdi-eye' : 'mdi-eye-off'" variant="text"
+                                density="compact"
+                                style="border-radius: 10px; color: var(--text-color-dark); font-size: 14px; margin-right: .3rem;"
+                                @click="element.visible = !element.visible"></v-btn>
+  
+                              <v-btn class="trash" icon="mdi-trash-can" variant="text" density="compact"
+                                style="border-radius: 10px; color: var(--text-color-dark); margin-right: .5rem; font-size: 14px;"
+                                @click="removeAt(element.id)"></v-btn>
+  
+                            </li>
+                          </template>
+                        </draggable>
+                    </v-container>
+                  </v-window-item>
+
+                  <!-- Seção propriedade -->
                   <v-window-item value="properties">
                     <v-container fluid>
-
                       <p>Propriedades aqui</p>
-
                     </v-container>
                   </v-window-item>
 
                 </v-window>
               </div>
+
+              <!-- Botão de adicionar nova etapa no seguimento -->
+              <v-btn v-show="tab==='phases'" @click="addPhase()" variant="text" text="Adicionar" density="default"  class="ml-auto text-none mr-4 btn-add-phase">
+                <template v-slot:prepend>
+                  <v-icon style="display: flex; font-size: x-large; align-self: end;" class="mr-1">mdi-plus</v-icon>
+                </template>
+                <button style="display: flex;">Adicionar Etapa</button>
+              </v-btn>
             </div>
 
 
@@ -211,10 +222,11 @@ function closeDialog() {
 
 
         <!-- Footer -->
-        <!-- <v-divider></v-divider> -->
-        <!-- <v-card-actions>
+        <v-divider></v-divider>
+        <v-card-actions>
           <v-spacer></v-spacer>
-        </v-card-actions> -->
+          <v-btn :disabled="verify" class="text-none mr-2 mt-1 mb-1" text="Salvar" variant="text" style="border-radius: 10px; color: var(--text-color-light); background-color: var(--button-color); font-size: 17px; min-width: 100px; height: 40px;"></v-btn>
+        </v-card-actions>
 
       </v-card>
     </v-dialog>
@@ -285,8 +297,10 @@ h4 {
 }
 
 .list-group {
+  width: 80%;
   min-height: 20px;
   list-style: none;
+  margin: auto;
 }
 
 .list-group-item {
@@ -305,5 +319,17 @@ h4 {
 
 .handle:active {
   cursor: grabbing;
+}
+
+.btn-add-phase{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: .3rem;
+  right: 0rem;
+  font-size: 17px;
+  color: var(--button-color);
+  border-radius: 20px;
 }
 </style>

@@ -60,7 +60,7 @@ onBeforeRouteUpdate(() => {
                         <v-btn class="mr-3" size="38" icon="mdi-account-multiple" variant="elevated"
                             style="border-radius: 10px; color: var(--text-color-dark);"></v-btn>
 
-                        <FollowupConfig title="Configurações do seguimento" :new="false"
+                        <FollowupConfig :title="`Configurações do seguimento -> `" :new="false"
                             :followupId="route.params.idFollowup"
                             :obj="JSON.stringify(modelFollowup)" />
                     </template>
@@ -72,7 +72,7 @@ onBeforeRouteUpdate(() => {
         <div id="main-phases">
             <Phase v-for="phase, index in store.followup.filter(p => p._id === route.params.idFollowup)[0].phases"
                 :key="index" :title="phase.title" :id="phase.id"
-                :tasks="store.tasks[`${route.params.idFollowup}`].filter(t => t.phase_id === phase.id && t.followup_id === route.params.idFollowup)"
+                :tasks="store.tasks[`${route.params.idFollowup}`].filter(t => t.phase_id === phase.id && t.followup_id === route.params.idFollowup) || []"
                 :search="search_task" />
         </div>
     </main>

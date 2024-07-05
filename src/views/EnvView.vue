@@ -25,23 +25,23 @@ const followupModel = {
   name: "",
   phases: [
     {
-      id: "1",
+      id: `1.${Date.now}.${store.user._id}`,
       title: "Primeira Etapa",
       color: "#ededed",
       visible: true
     },
     {
-      id: "2",
+      id: `2.${Date.now}.${store.user._id}`,
       title: "Segunda Etapa",
       color: "#ededed",
       visible: true
     },
     {
-      id: "3",
+      id: `3.${Date.now}.${store.user._id}`,
       title: "Terceira Etapa",
       color: "#ededed",
       visible: true
-    }
+    },
   ],
   environment_id: Env ? Env._id : null,
 }
@@ -95,7 +95,7 @@ const followupModel = {
         :class="route.params.idFollowup === followup._id ? 'followup-active' : ''"
         v-show="followup.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) || search === ''">
         <v-list-item-title><b>{{ followup.name }}</b></v-list-item-title>
-        <p style="color: #8f8f8f; font-size: 14px;">57 registros</p style="color: #efefef;">
+        <p style="color: #8f8f8f; font-size: 16px;">{{ followup.countTasks>1 ? `${followup.countTasks} registros` : followup.countTasks===1 ? `${followup.countTasks} registro` : `Nenhum registro` }}</p style="color: #efefef;">
 
         <template v-slot:append>
           <v-menu transition="slide-x-transition" :close-on-content-click="false" location="end top">
