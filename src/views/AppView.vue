@@ -43,7 +43,7 @@ onMounted(() => {
         </template>
 
         <v-list class="mt-7"
-          style=" width: 290px; padding: 0; background: linear-gradient(45deg, rgba(0,34,55,1) 0%, rgba(1,12,24,1) 50%, rgba(0,34,55,1) 100%); color: var(--text-color-light); border-radius: 20px;">
+          style=" width: 270px; padding: 0; background: linear-gradient(45deg, rgba(0,34,55,1) 0%, rgba(1,12,24,1) 50%, rgba(0,34,55,1) 100%); color: var(--text-color-light); border-radius: 20px;">
           <div class="mt-7 mb-5"
             style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <v-icon style="color: #4FD8F1;" size="60">mdi-checkbox-marked-circle-outline</v-icon>
@@ -51,7 +51,11 @@ onMounted(() => {
             <p class="" style="font-size: 16px;">{{ store.user.email }}</p>
           </div>
           <v-divider></v-divider>
-          <v-list-item class="mb-1" append-icon="mdi-logout" style="font-size: 15px; padding-inline: 2.5rem;">
+          <v-list-item @click="router.push('/ambientes/')" class="mb-1" append-icon="mdi-folder-multiple-outline" style="font-size: 15px; padding-inline: 1.5rem;">
+            <v-list-item-title>Meus ambientes</v-list-item-title>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item @click="store.logout(router)" class="mb-1" append-icon="mdi-logout" style="font-size: 15px; padding-block: 0; padding-inline: 1.5rem;">
             <v-list-item-title>Sair</v-list-item-title>
           </v-list-item>
         </v-list>

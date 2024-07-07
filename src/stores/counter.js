@@ -27,12 +27,13 @@ export const useCounterStore = defineStore(
       // listAllFollowup();
     }
 
-    function logout() {
+    function logout(router) {
       auth.value = false;
       user.value = {};
       environments.value = [];
       followup.value = [];
       tasks.value = {};
+      router.push({ name: 'login' });
     }
 
     function removeParamsURL(url) {
@@ -46,14 +47,9 @@ export const useCounterStore = defineStore(
       loadEnvironments.value = true;
       setTimeout(() => {
         axios
-          .post(
-            `${
-              import.meta.env.VITE_URL_BASE_API
-            }/Environment/listAllEnvironment`,
-            {
-              tokenUser: user.value.token,
-            }
-          )
+          .post(`${import.meta.env.VITE_URL_BASE_API}/Environment/listAllEnvironment`, {
+            tokenUser: user.value.token,
+          })
           .then(function (response) {
             if (response.data.success) {
               environments.value = response.data.data;
@@ -78,18 +74,15 @@ export const useCounterStore = defineStore(
       loadFollowups.value = true;
       setTimeout(() => {
         axios
-          .post(
-            `${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`,
-            {
-              envId: env,
-              tokenUser: user.value.token,
-            }
-          )
+          .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`, {
+            envId: env,
+            tokenUser: user.value.token,
+          })
           .then(function (response) {
             if (response.data.success) {
               followup.value = response.data.data;
-              if (JSON.stringify(tasks.value)==="{}") {
-                followup.value.forEach(element => {
+              if (JSON.stringify(tasks.value) === "{}") {
+                followup.value.forEach((element) => {
                   tasks.value[`${element._id}`] = [];
                 });
               }
@@ -101,6 +94,66 @@ export const useCounterStore = defineStore(
             loadFollowups.value = false;
           });
       }, 1000);
+    }
+
+    function createFollowup(router, dataFollowup) {
+      dataFollowup.tokenUser = user.value.token;
+      axios
+        .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/createFollowup`, dataFollowup)
+        .then(function (response) {
+          if (response.data.success) {
+            const followupCreated = response.data.data;
+            followup.value.push(followupCreated);
+            tasks.value[`${followupCreated._id}`] = [];
+            router.push({ name: 'followup-unique', params: { idFollowup: followupCreated._id }});
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    function deleteFollowup(idFollowup, idEnv, route, router) {
+      axios
+        .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/deleteFollowup`, {
+          followupId: idFollowup,
+          environment_id: idEnv,
+          tokenUser: user.value.token,
+        })
+        .then(function (response) {
+          if (response.data.success) {
+            const followupRemove = response.data.data;
+            followup.value = followup.value.filter((t) => t._id !== followupRemove._id);
+            delete tasks.value[`${followupRemove._id}`];
+            if (route.params.idFollowup === followupRemove._id) {
+              router.push(`/${environments.value.filter((e) => e._id === idEnv)[0].url}/`);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    function updateFollowup(idFollowup, data, idEnv, router) {
+      axios
+        .put(`${import.meta.env.VITE_URL_BASE_API}/Followup/updateFollowup`, {
+          followupId: idFollowup,
+          dataFollowup: data,
+          environment_id: idEnv,
+          tokenUser: user.value.token,
+        })
+        .then(function (response) {
+          if (response.data.success) {
+            const followupUpdated = response.data.data;
+            followup.value[followup.value.indexOf(followup.value.filter((f) => f._id === idFollowup)[0])] = response.data.data;
+            // router.push(`/${environments.value.filter(e=>e._id===idEnv)[0].url}/seguimento/${idFollowup}/`);
+            router.push({ name: 'followup-unique', params: { idFollowup: followupUpdated._id }});
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     }
 
     function listAllTasks(followup) {
@@ -134,7 +187,7 @@ export const useCounterStore = defineStore(
         })
         .then(function (response) {
           if (response.data.success) {
-            tasks.value[`${followup}`][tasks.value[`${followup}`].indexOf(tasks.value[`${followup}`].filter(t=>t._id===task)[0])] = response.data.data;
+            tasks.value[`${followup}`][tasks.value[`${followup}`].indexOf(tasks.value[`${followup}`].filter((t) => t._id === task)[0])] = response.data.data;
           }
         })
         .catch(function (error) {
@@ -155,8 +208,8 @@ export const useCounterStore = defineStore(
           if (response.data.success) {
             const taskCreated = response.data.data;
             tasks.value[`${idFollowup}`].unshift(taskCreated);
-            followup.value.filter(f=>f._id===idFollowup)[0].countTasks += 1;
-            router.push({ name: 'task-unique', params: { idTask: taskCreated._id } });
+            followup.value.filter((f) => f._id === idFollowup)[0].countTasks += 1;
+            router.push({ name: "task-unique", params: { idTask: taskCreated._id } });
           }
         })
         .catch(function (error) {
@@ -176,7 +229,7 @@ export const useCounterStore = defineStore(
           if (response.data.success) {
             // const taskUpdated = response.data.data;
             // tasks.value[`${idFollowup}`].push(taskUpdated);
-            router.push({ name: 'followup-unique', params: { idFollowup: idFollowup } });
+            router.push({ name: "followup-unique", params: { idFollowup: idFollowup } });
           }
         })
         .catch(function (error) {
@@ -194,15 +247,14 @@ export const useCounterStore = defineStore(
         .then(function (response) {
           if (response.data.success) {
             const taskRemove = response.data.data;
-            tasks.value[`${idFollowup}`] = tasks.value[`${idFollowup}`].filter(t=>t._id!==taskRemove._id);
-            followup.value.filter(f=>f._id===idFollowup)[0].countTasks -= 1;
+            tasks.value[`${idFollowup}`] = tasks.value[`${idFollowup}`].filter((t) => t._id !== taskRemove._id);
+            followup.value.filter((f) => f._id === idFollowup)[0].countTasks -= 1;
           }
         })
         .catch(function (error) {
           console.log(error);
         });
     }
-
 
     // Funções Drag and Drop
     function allowDropPhase(ev) {
@@ -216,25 +268,22 @@ export const useCounterStore = defineStore(
     async function dropPhase(ev, id, followupId) {
       ev.preventDefault();
       const data = ev.dataTransfer.getData("text");
-      let response = await fetch(
-        `${import.meta.env.VITE_URL_BASE_API}/Task/updatePhaseTask`,
-        {
-          method: "PUT",
-          mode: "cors",
-          cache: "no-cache",
-          headers: {
-            "Content-Type": "application/json",
+      let response = await fetch(`${import.meta.env.VITE_URL_BASE_API}/Task/updatePhaseTask`, {
+        method: "PUT",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        redirect: "follow",
+        body: JSON.stringify({
+          taskId: data,
+          dataTask: {
+            phase_id: id,
           },
-          redirect: "follow",
-          body: JSON.stringify({
-            taskId: data,
-            dataTask: {
-              phase_id: id,
-            },
-            tokenUser: user.value.token,
-          }),
-        }
-      );
+          tokenUser: user.value.token,
+        }),
+      });
       if (response.ok) {
         // document
         //   .getElementById(id)
@@ -249,20 +298,16 @@ export const useCounterStore = defineStore(
     let leaveId = null;
     function dragEnter(ev, id) {
       enterId = id;
-      document.getElementById(id).querySelector(".model-task").style.display =
-        "flex";
+      document.getElementById(id).querySelector(".model-task").style.display = "flex";
       if (id !== leaveId && leaveId !== null) {
-        document
-          .getElementById(leaveId)
-          .querySelector(".model-task").style.display = "none";
+        document.getElementById(leaveId).querySelector(".model-task").style.display = "none";
       }
     }
 
     function dragLeave(ev, id) {
       leaveId = id;
       if (ev.target.id === id && enterId !== id) {
-        document.getElementById(id).querySelector(".model-task").style.display =
-          "none";
+        document.getElementById(id).querySelector(".model-task").style.display = "none";
       }
     }
 
@@ -277,6 +322,9 @@ export const useCounterStore = defineStore(
       removeParamsURL,
       listAllEnvironment,
       loadEnvironments,
+      createFollowup,
+      deleteFollowup,
+      updateFollowup,
       listAllFollowup,
       loadFollowups,
       getTask,

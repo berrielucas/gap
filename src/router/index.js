@@ -29,7 +29,23 @@ const router = createRouter({
                   name: "task-unique",
                   component: () => import("../components/popup/TaskConfig.vue"),
                 },
+                {
+                  path: "config",
+                  name: "followup-config",
+                  component: () => import("../components/popup/FollowupConfig.vue"),
+                  meta: {
+                    new: false
+                  }
+                },
               ],
+            },
+            {
+              path: "novo-seguimento",
+              name: "new-followup",
+              component: () => import("../components/popup/FollowupConfig.vue"),
+              meta: {
+                new: true
+              }
             },
           ],
         },

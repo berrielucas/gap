@@ -22,33 +22,34 @@ const props = defineProps({
   },
   search: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
-
 </script>
 
 <template>
-  <div :id="id" :class="id" @drop="store.dropPhase($event, id, route.params.idFollowup)" @dragenter="store.dragEnter($event, id)"
-    @dragleave="store.dragLeave($event, id)" @dragover="store.allowDropPhase($event)"
-    style="height: 100%; position: relative">
+  <div
+    :id="id"
+    :class="id"
+    @drop="store.dropPhase($event, id, route.params.idFollowup)"
+    @dragenter="store.dragEnter($event, id)"
+    @dragleave="store.dragLeave($event, id)"
+    @dragover="store.allowDropPhase($event)"
+    style="height: 100%; position: relative"
+  >
     <v-card :id="`etapa-${id}`" elevation="10" class="etapa">
       <div :id="`etapa-header-${id}`" class="etapa-header">
         <v-progress-circular v-if="store.loadTasks" class="ml-2" indeterminate :size="25"></v-progress-circular>
-        <v-list-item style=" flex-grow: 1; margin: 0; padding: 0 0.3rem 0 0.7rem">
+        <v-list-item style="flex-grow: 1; margin: 0; padding: 0 0.3rem 0 0.7rem">
           <v-list-item-title class="h4">{{ title }}</v-list-item-title>
           <template v-slot:append>
-            <v-btn icon="mdi-plus" variant="text" density="compact"
-              style="border-radius: 10px; color: var(--bg-color-gray);" @click="store.createTask(router, route.params.idFollowup, id)" ></v-btn>
-            <v-btn icon="mdi-dots-vertical" variant="text" density="compact"
-              style="border-radius: 10px; color: var(--bg-color-gray);"></v-btn>
+            <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray)" @click="store.createTask(router, route.params.idFollowup, id)"></v-btn>
+            <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray)"></v-btn>
           </template>
         </v-list-item>
       </div>
       <section v-if="!store.loadTasks" :id="`etapa-cards-${id}`" class="etapa-cards">
-        <CardTask v-for="(task, index) in tasks" :key="task._id"
-          v-show="task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())" :id="task._id"
-          :content="JSON.stringify(task)" />
+        <CardTask v-for="(task, index) in tasks" :key="task._id" v-show="task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())" :id="task._id" :content="JSON.stringify(task)" />
       </section>
       <div :id="`model-${id}`" class="model-task"></div>
     </v-card>
@@ -78,7 +79,7 @@ const props = defineProps({
   /* color: var(--text-color-dark); */
   color: var(--bg-color-gray);
   box-shadow: 0 0 10px #9e9e9e;
-  transition: all .5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 
   & .h4 {
     font-weight: 700;
