@@ -24,7 +24,6 @@ export const useCounterStore = defineStore(
       auth.value = true;
       user.value = obj.user;
       user.value.token = obj.token;
-      // listAllFollowup();
     }
 
     function logout(router) {
@@ -228,7 +227,6 @@ export const useCounterStore = defineStore(
         .then(function (response) {
           if (response.data.success) {
             // const taskUpdated = response.data.data;
-            // tasks.value[`${idFollowup}`].push(taskUpdated);
             router.push({ name: "followup-unique", params: { idFollowup: idFollowup } });
           }
         })
@@ -289,7 +287,6 @@ export const useCounterStore = defineStore(
         //   .getElementById(id)
         //   .querySelector(`#etapa-cards-${id}`)
         //   .appendChild(document.getElementById(data));
-        // tasks.value[`${followupId}`].filter(t=>t._id===data)[0].phase_id = id;
         getTask(data, followupId);
       }
     }

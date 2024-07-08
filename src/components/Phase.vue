@@ -48,10 +48,10 @@ const props = defineProps({
           </template>
         </v-list-item>
       </div>
-      <section v-if="!store.loadTasks" :id="`etapa-cards-${id}`" class="etapa-cards">
+      <section v-if="!store.loadTasks&&tasks.length>0" :id="`etapa-cards-${id}`" class="etapa-cards">
         <CardTask v-for="(task, index) in tasks" :key="task._id" v-show="task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())" :id="task._id" :content="JSON.stringify(task)" />
       </section>
-      <div :id="`model-${id}`" class="model-task"></div>
+      <div :id="`model-${id}`" class="model-task" :class="tasks.length===0 ? 'mt-3' : ''"></div>
     </v-card>
   </div>
 </template>
@@ -71,7 +71,7 @@ const props = defineProps({
 
 .etapa-header {
   display: flex;
-  height: 45px;
+  /* height: 45px; */
   /* background-color: var(--bg-color-gray); */
   background: linear-gradient(30deg, rgba(0, 34, 55, 1) 0%, rgba(1, 12, 24, 1) 30% 70%, rgba(0, 34, 55, 1) 100%);
   align-items: center;

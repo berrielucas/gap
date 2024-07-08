@@ -20,35 +20,10 @@ const drawer = ref(true);
 const menu = ref(false);
 const search = ref("");
 
-const followupModel = {
-  codigo: null,
-  name: "",
-  phases: [
-    {
-      id: `1.${Date.now}.${store.user._id}`,
-      title: "Primeira Etapa",
-      color: "#ededed",
-      visible: true,
-    },
-    {
-      id: `2.${Date.now}.${store.user._id}`,
-      title: "Segunda Etapa",
-      color: "#ededed",
-      visible: true,
-    },
-    {
-      id: `3.${Date.now}.${store.user._id}`,
-      title: "Terceira Etapa",
-      color: "#ededed",
-      visible: true,
-    },
-  ],
-  environment_id: Env ? Env._id : null,
-};
 </script>
 
 <template>
-  <v-navigation-drawer v-if="store.environments.filter((e) => e.url === route.params.name).length > 0" v-model="drawer" permanent elevation="5">
+  <v-navigation-drawer class="menu-followups" v-if="store.environments.filter((e) => e.url === route.params.name).length > 0" v-model="drawer" permanent elevation="5">
     <div class="d-flex px-2 my-2 justify-center">
       <v-menu transition="scale-transition" location="bottom center" v-model="menu" persistent>
         <template v-slot:activator="{ props }">
@@ -89,7 +64,7 @@ const followupModel = {
       </v-btn>
     </div>
 
-    <div class="my-2 mt-5">
+    <div class="my-2 mt-5" id="all-followups">
       <v-skeleton-loader v-if="store.loadFollowups" class="mx-auto mb-2" type="list-item-three-line"></v-skeleton-loader>
 
       <v-scale-transition class="py-0" tag="v-list" group>
@@ -98,7 +73,7 @@ const followupModel = {
             style="padding: 0.8rem 0.5rem 0.8rem 0.8rem; color: var(--text-color-dark); transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)"
             @click="
               router.push({ name: 'followup-unique', params: { idFollowup: followup._id } });
-              // store.listAllTasks(followup._id);
+              store.listAllTasks(followup._id);
               search = '';
             "
             :class="route.params.idFollowup === followup._id ? 'followup-active' : ''"
@@ -141,16 +116,16 @@ const followupModel = {
 </template>
 
 <style scoped>
-#main::-webkit-scrollbar {
-  width: 7px;
+::v-deep ::-webkit-scrollbar {
+  width: 4px;
 }
 
-#main::-webkit-scrollbar-track {
+::v-deep ::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-#main::-webkit-scrollbar-thumb {
-  background-color: var(--scroll-color-thumb);
+::v-deep ::-webkit-scrollbar-thumb {
+  background-color: #898989;
   border-radius: 20px;
 }
 

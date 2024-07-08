@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter, RouterView, onBeforeRouteUpdate, onBeforeRouteLeave } from "vue-router";
 import { useCounterStore } from "../stores/counter.js";
 import Phase from "@/components/Phase.vue";
+import PhaseOculta from "@/components/PhaseOculta.vue";
 // import FollowupConfig from "@/components/popup/Teste.vue";
 // import Filter from "@/components/Filter.vue";
 
@@ -14,11 +15,11 @@ const search_task = ref("");
 store.listAllTasks(route.params.idFollowup);
 
 onBeforeRouteUpdate(() => {
-  setTimeout(() => {
-    if (!store.loadTasks && !route.params.idTask && route.name!=='followup-config') {
-      store.listAllTasks(route.params.idFollowup);
-    }
-  }, 100);
+    setTimeout(() => {
+      if (!store.loadTasks && !route.params.idTask && route.name!=='followup-config') {
+        store.listAllTasks(route.params.idFollowup);
+      }
+    }, 100);
 });
 
 const returnIdFollowup = computed(() => {
@@ -98,13 +99,27 @@ const returnIdFollowup = computed(() => {
 
     <div id="main-phases">
       <Phase
-        v-for="(phase, index) in store.followup.filter((p) => p._id === route.params.idFollowup)[0].phases"
+        v-for="(phase, index) in store.followup.filter((p) => p._id === route.params.idFollowup)[0].phases.filter(p=>p.visible)"
         :key="index"
         :title="phase.title"
         :id="phase.id"
         :tasks="store.tasks[`${route.params.idFollowup}`].filter((t) => t.phase_id === phase.id && t.followup_id === route.params.idFollowup) || []"
         :search="search_task"
       />
+      <v-divider v-if="store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>!p.visible).length>0&&store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>p.visible).length>0" class="ml-2 mr-2 border-opacity-25" :vertical="true" style="color: var(--text-color-dark);"></v-divider>
+      <div v-if="store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>!p.visible).length>0" style="display: flex; flex-direction: column;">
+        <p class="mb-3 ml-1" style="color: var(--text-color-dark); font-size: large"><b>Etapas ocultas</b></p>
+        <div style="display: flex; flex-direction: column; height: 100%; overflow: auto;">
+            <PhaseOculta
+                v-for="(phase, index) in store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>!p.visible)"
+                :key="index"
+                :title="phase.title"
+                :id="phase.id"
+                :tasks="store.tasks[`${route.params.idFollowup}`].filter((t) => t.phase_id === phase.id && t.followup_id === route.params.idFollowup) || []"
+                class="mb-2 mr-2"
+            />
+        </div>
+      </div>
     </div>
   </main>
 </template>

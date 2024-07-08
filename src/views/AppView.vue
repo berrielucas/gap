@@ -9,18 +9,24 @@ const theme = ref("light");
 const menu = ref(false);
 
 onMounted(() => {
-  if (!store.auth) {
-    router.push({ name: 'login' });
-  }
+  setTimeout(() => {
+    if (!store.auth) {
+      router.push({ name: 'login' });
+    } else {
+      if (route.name==='empty') {
+        store.listAllEnvironment(router);
+      }
+    }
+  }, 1000);
 });
 
 
 </script>
 
 <template>
-  <v-app :theme="theme" v-if="store.auth">
+  <v-app :theme="theme" v-if="store.auth||route.name==='empty'">
 
-    <v-app-bar height="60"
+    <v-app-bar height="60" v-if="route.name!=='empty'"
       style="background: linear-gradient(30deg, rgba(0,34,55,1) 0%, rgba(1,12,24,1) 30% 70%, rgba(0,34,55,1) 100%); color: var(--text-color-light);">
       <v-avatar class="ms-2 mr-2" size="50" variant="flat" @click="router.push(`/${route.params.name}/`)"
         style="cursor: pointer; color: #4FD8F1;">
@@ -62,11 +68,12 @@ onMounted(() => {
       </v-menu>
     </v-app-bar>
 
-    <!-- <RouterView v-slot="{ Component }">
-      <v-slide-x-transition mode="out-in">
-        <component :is="Component" />
-      </v-slide-x-transition>
-    </RouterView> -->
+
+    <v-main class="load" v-if="route.name==='empty'">
+      <v-progress-circular indeterminate :size="40" style="color: var(--button-color)"></v-progress-circular>
+    </v-main>
+
+
     <RouterView />
   </v-app>
 </template>
@@ -86,5 +93,16 @@ onMounted(() => {
 
 .menu-deactive {
   background-color: transparent !important;
+}
+
+.load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg-color-gray);
+  z-index: 1000;
+  transition: all 0.2s ease-in-out;
 }
 </style>
