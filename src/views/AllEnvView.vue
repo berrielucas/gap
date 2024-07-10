@@ -5,7 +5,6 @@ import { useCounterStore } from "../stores/counter.js";
 import { ref } from "vue";
 const store = useCounterStore();
 const router = useRouter();
-
 store.listAllEnvironment();
 
 const search = ref("");
@@ -58,11 +57,11 @@ const search = ref("");
           </div>
         </v-col>
 
-        <v-col v-if="!store.loadEnvironments" cols="12" sm="4">
+        <!-- <v-col v-if="!store.loadEnvironments" cols="12" sm="4">
           <v-list-item @click="" class="env-new mb-3 mr-1 ml-1">
             <h3 style="display: flex; gap: 0.3rem; align-items: center"><v-icon style="display: flex">mdi-plus-thick</v-icon> Novo Ambiente</h3>
           </v-list-item>
-        </v-col>
+        </v-col> -->
       </v-row>
     </v-container>
   </v-main>
@@ -102,7 +101,6 @@ const search = ref("");
   border: dashed 3px gray;
   height: 100px;
   border-radius: 20px !important;
-  /* background-color: red; */
   color: gray;
   cursor: pointer;
 }
@@ -132,7 +130,6 @@ const search = ref("");
   display: flex;
   align-items: start;
   gap: 0.3rem;
-  /* --color-status: red; */
 
   & h5 {
     font-size: 14px;

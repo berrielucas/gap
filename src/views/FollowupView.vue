@@ -4,7 +4,6 @@ import { useRoute, useRouter, RouterView, onBeforeRouteUpdate, onBeforeRouteLeav
 import { useCounterStore } from "../stores/counter.js";
 import Phase from "@/components/Phase.vue";
 import PhaseOculta from "@/components/PhaseOculta.vue";
-// import FollowupConfig from "@/components/popup/Teste.vue";
 // import Filter from "@/components/Filter.vue";
 
 const store = useCounterStore();
@@ -15,30 +14,34 @@ const search_task = ref("");
 store.listAllTasks(route.params.idFollowup);
 
 onBeforeRouteUpdate(() => {
+  if (!route.params.idTask) {
     setTimeout(() => {
       if (!store.loadTasks && !route.params.idTask && route.name!=='followup-config') {
         store.listAllTasks(route.params.idFollowup);
       }
     }, 100);
+  }
 });
 
-const returnIdFollowup = computed(() => {
-  return store.followup.filter((p) => p._id === route.params.idFollowup)[0]._id;
-});
+const Env = store.environments.filter((e) => e.url === route.params.name)[0];
 </script>
 
 <template>
   <main id="main-view" v-if="store.followup.filter((p) => p._id === route.params.idFollowup).length > 0">
     <RouterView />
 
+    <!-- Header Followup -->
     <div id="main-header">
       <v-card elevation="0" class="header" style="border-radius: 10px">
         <v-list-item style="width: 100%; margin: 0; padding: 0 0.5rem ">
           <v-list-item-title class="title-followup">{{ store.followup.filter((p) => p._id === route.params.idFollowup)[0].name }}</v-list-item-title>
+
           <template v-slot:append>
+
+            <!-- Load tasks -->
             <v-btn
               :loading="store.loadTasks"
-              class="mr-3"
+              class="ml-3"
               size="38"
               icon="mdi-sync"
               variant="elevated"
@@ -50,19 +53,22 @@ const returnIdFollowup = computed(() => {
               </template>
             </v-btn>
 
+            <!-- Add task -->
             <v-btn
-              class="mr-3"
+              class="ml-3"
               size="38"
               icon="mdi-plus"
               variant="elevated"
               style="border-radius: 10px; color: var(--text-color-dark)"
               @click="store.createTask(router, route.params.idFollowup, store.followup.filter((p) => p._id === route.params.idFollowup)[0].phases[0].id)"
+              v-if="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('create-task')"
             ></v-btn>
 
+            <!-- <Filter /> -->
             <v-tooltip location="bottom center" text="Em breve">
               <template v-slot:activator="{ props }">
                 <v-btn
-                  class="mr-3"
+                  class="ml-3"
                   v-bind="props"
                   :disabled="false"
                   size="38"
@@ -73,31 +79,31 @@ const returnIdFollowup = computed(() => {
                 </v-btn>
               </template>
             </v-tooltip>
-            <!-- <Filter /> -->
 
-            <div class="mr-3" style="display: flex; color: var(--text-color-dark); width: 200px; border: solid 1px #bfbfbf; border-radius: 14px; overflow: hidden">
+            <!-- Input search tasks -->
+            <div class="ml-3" style="display: flex; color: var(--text-color-dark); width: 200px; border: solid 1px #bfbfbf; border-radius: 14px; overflow: hidden">
               <v-text-field v-model="search_task" density="compact" label="Buscar aqui" variant="solo" single-line hide-details append-inner-icon="mdi-magnify"></v-text-field>
             </div>
 
+            <!-- Share Followup -->
             <v-tooltip location="bottom center" text="Em breve">
               <template v-slot:activator="{ props }">
-                <v-btn v-bind="props" class="mr-3" size="38" icon="mdi-account-multiple" variant="text" style="border-radius: 10px; color: var(--text-color-dark); background-color: gray"></v-btn>
+                <v-btn v-bind="props" class="ml-3" size="38" icon="mdi-account-multiple" variant="text" style="border-radius: 10px; color: var(--text-color-dark); background-color: gray"></v-btn>
               </template>
             </v-tooltip>
-
-            <!-- <FollowupConfig
-              :title="`Configurações do seguimento ➜ `"
-              :new="false"
-              :followupId="route.params.idFollowup"
-              :obj="returnIdFollowup"
-            /> -->
-            <v-btn icon="mdi-cog" size="38" variant="elevated" style="border-radius: 10px; color: var(--text-color-dark)" @click="router.push({ name: 'followup-config' })"></v-btn>
+            
+            <!-- Config followup -->
+            <v-btn v-if="store.user.environment.filter(e=>e.id===Env._id)[0].permissions.includes('create-followup')" :disabled="store.user.environment.filter(e=>e.id===Env._id)[0].permissions.includes('create-followup') ? false : true" icon="mdi-cog" class="ml-3" size="38" variant="elevated" style="border-radius: 10px; color: var(--text-color-dark)" @click="router.push({ name: 'followup-config' })"></v-btn>
+          
           </template>
         </v-list-item>
       </v-card>
     </div>
 
+    <!-- Sessão principal -->
     <div id="main-phases">
+
+      <!-- Etapas visíveis -->
       <Phase
         v-for="(phase, index) in store.followup.filter((p) => p._id === route.params.idFollowup)[0].phases.filter(p=>p.visible)"
         :key="index"
@@ -106,7 +112,10 @@ const returnIdFollowup = computed(() => {
         :tasks="store.tasks[`${route.params.idFollowup}`].filter((t) => t.phase_id === phase.id && t.followup_id === route.params.idFollowup) || []"
         :search="search_task"
       />
+
       <v-divider v-if="store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>!p.visible).length>0&&store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>p.visible).length>0" class="ml-2 mr-2 border-opacity-25" :vertical="true" style="color: var(--text-color-dark);"></v-divider>
+
+      <!-- Etapas ocultas -->
       <div v-if="store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases.filter(p=>!p.visible).length>0" style="display: flex; flex-direction: column;">
         <p class="mb-3 ml-1" style="color: var(--text-color-dark); font-size: large"><b>Etapas ocultas</b></p>
         <div style="display: flex; flex-direction: column; height: 100%; overflow: auto;">
@@ -147,7 +156,6 @@ const returnIdFollowup = computed(() => {
     align-items: center;
     height: 55px;
     width: 100%;
-    /* background-color: var(--bg-color-gray); */
     background-color: transparent;
     color: var(--text-color-dark);
 

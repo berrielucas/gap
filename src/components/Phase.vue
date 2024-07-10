@@ -43,7 +43,7 @@ const props = defineProps({
         <v-list-item style="flex-grow: 1; margin: 0; padding: 0 0.3rem 0 0.7rem">
           <v-list-item-title class="h4">{{ title }}</v-list-item-title>
           <template v-slot:append>
-            <v-btn icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray)" @click="store.createTask(router, route.params.idFollowup, id)"></v-btn>
+            <v-btn v-if="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('create-task')" icon="mdi-plus" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray)" @click="store.createTask(router, route.params.idFollowup, id)"></v-btn>
             <v-btn icon="mdi-dots-vertical" variant="text" density="compact" style="border-radius: 10px; color: var(--bg-color-gray)"></v-btn>
           </template>
         </v-list-item>
@@ -71,12 +71,9 @@ const props = defineProps({
 
 .etapa-header {
   display: flex;
-  /* height: 45px; */
-  /* background-color: var(--bg-color-gray); */
   background: linear-gradient(30deg, rgba(0, 34, 55, 1) 0%, rgba(1, 12, 24, 1) 30% 70%, rgba(0, 34, 55, 1) 100%);
   align-items: center;
   justify-content: space-between;
-  /* color: var(--text-color-dark); */
   color: var(--bg-color-gray);
   box-shadow: 0 0 10px #9e9e9e;
   transition: all 0.5s ease-in-out;
@@ -88,16 +85,11 @@ const props = defineProps({
 }
 
 .etapa-cards {
-  /* height: 100%; */
   display: flex;
   flex-direction: column;
   padding: 0.8rem 0.5rem;
   overflow: auto;
   gap: 0.8rem;
-  /* padding-bottom: .8rem; */
-  /* background-color: #ececec3a;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(5px); */
 }
 
 .etapa-cards::-webkit-scrollbar {

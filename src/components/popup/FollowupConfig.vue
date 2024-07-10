@@ -15,13 +15,12 @@ const dialog = ref(true);
 const dialogConfirm = ref(false);
 const messageConfirm = ref("");
 const tab = ref("general");
-const modeColor = ref("hex");
 const drag = ref(false);
 const dragOptions = computed(() => {
   return {
     animation: 200,
     group: "description",
-    disabled: false,
+    disabled: disable.value,
     ghostClass: "ghost",
   };
 });
@@ -58,32 +57,42 @@ const followupOrigin = JSON.stringify(model);
 const followup = ref(model);
 
 function removeAt(idx) {
-  followup.value.phases = followup.value.phases.filter((i) => i.id !== idx);
+  if ((!newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('edit-followup'))||(newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('create-followup'))) {
+    followup.value.phases = followup.value.phases.filter((i) => i.id !== idx);
+  }
 }
 
 function addPhase() {
-  followup.value.phases.unshift({
-    id: `${followup.value.phases.length + 1}.${Date.now()}.${store.user._id}`,
-    title: "Nova Etapa",
-    color: "#ededed",
-    visible: true,
-  });
+  if ((!newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('edit-followup'))||(newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('create-followup'))) {
+    followup.value.phases.unshift({
+      id: `${followup.value.phases.length + 1}.${Date.now()}.${store.user._id}`,
+      title: "Nova Etapa",
+      color: "#ededed",
+      visible: true,
+    });
+  }
 }
 
 function saveFollowup() {
   if (newFollowup.value) {
-    store.createFollowup(router, followup.value);
-    followup.value = JSON.parse(followupOrigin);
+    if (store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('create-followup')) {
+      store.createFollowup(router, followup.value);
+      followup.value = JSON.parse(followupOrigin);
+    } else {
+      router.push(`/${route.params.name}/`);
+    }
   } else {
-    store.updateFollowup(route.params.idFollowup, followup.value, followup.value.environment_id, router);
+    if (store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('edit-followup')) {
+      store.updateFollowup(route.params.idFollowup, followup.value, followup.value.environment_id, router);
+    } else {
+      router.push({
+        name: "followup-unique",
+        params: { idFollowup: route.params.idFollowup },
+      });
+    }
   }
   dialogConfirm.value = false;
   messageConfirm.value = "";
-  tab.value = "general";
-
-  // if (!newFollowup.value) {
-  //   router.push(`/${route.params.name}/seguimento/${route.params.idFollowup}/`);
-  // }
 }
 
 const verify = computed(() => {
@@ -93,17 +102,32 @@ const verify = computed(() => {
   return followupOrigin !== JSON.stringify(followup.value) && followup.value.name !== "" ? false : true;
 });
 
+const disable = computed(() => {
+  return ((!newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('edit-followup'))||(newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('create-followup'))) ? false : true;
+});
+
+const vIf = computed(() => {
+  return ((!newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('edit-followup'))||(newFollowup.value && store.user.environment.filter(e=>e.id===followup.value.environment_id)[0].permissions.includes('create-followup'))) ? true : false;
+});
+
 function closeDialog() {
-  if (followupOrigin !== JSON.stringify(followup.value) && dialogConfirm.value === false) {
-    messageConfirm.value = newFollowup.value ? "Você ainda não salvou o seguimento, deseja mesmo sair?" : "Você tem alterações ainda não salvas, deseja mesmo sair?";
-    dialogConfirm.value = true;
+  if (vIf.value) {
+    if (followupOrigin !== JSON.stringify(followup.value) && dialogConfirm.value === false) {
+      messageConfirm.value = newFollowup.value ? "Você ainda não salvou o seguimento, deseja mesmo sair?" : "Você tem alterações ainda não salvas, deseja mesmo sair?";
+      dialogConfirm.value = true;
+    } else {
+      Object.keys(followup.value).forEach(element => {
+        followup.value[`${element}`] = JSON.parse(followupOrigin)[`${element}`];
+      });
+      dialogConfirm.value = false;
+      messageConfirm.value = "";
+      if (!newFollowup.value) {
+        router.push({ name: "followup-unique", params: { idFollowup: route.params.idFollowup } });
+      } else {
+        router.push(`/${route.params.name}/`);
+      }
+    }
   } else {
-    Object.keys(followup.value).forEach(element => {
-      followup.value[`${element}`] = JSON.parse(followupOrigin)[`${element}`];
-    });
-    dialogConfirm.value = false;
-    messageConfirm.value = "";
-    tab.value = "general";
     if (!newFollowup.value) {
       router.push({ name: "followup-unique", params: { idFollowup: route.params.idFollowup } });
     } else {
@@ -174,7 +198,7 @@ function closeDialog() {
                       <v-col cols="12" sm="4" style="padding: 0">
                         <v-row dense>
                           <v-col cols="12" sm="12">
-                            <InputText v-model="followup.name" text="Nome *" :required="true" />
+                            <InputText :disabled="disable" v-model="followup.name" text="Nome *" :required="true" />
                           </v-col>
                         </v-row>
                       </v-col>
@@ -190,10 +214,12 @@ function closeDialog() {
                           <li class="list-group-item">
                             <v-icon class="handle" icon="mdi-swap-vertical"></v-icon>
                             <div style="overflow-y: hidden; width: 100%">
-                              <v-text-field density="comfortable" variant="solo" hide-details v-model="element.title"></v-text-field>
+                              <v-text-field :disabled="disable" density="comfortable" variant="solo" hide-details v-model="element.title"></v-text-field>
                             </div>
 
                             <v-btn
+                              v-if="vIf"
+                              :disabled="disable"
                               class="trash"
                               :icon="element.visible ? 'mdi-eye' : 'mdi-eye-off'"
                               variant="text"
@@ -203,6 +229,8 @@ function closeDialog() {
                             ></v-btn>
 
                             <v-btn
+                              v-if="vIf"
+                              :disabled="disable"
                               class="trash"
                               icon="mdi-trash-can"
                               variant="text"
@@ -226,7 +254,7 @@ function closeDialog() {
               </div>
 
               <!-- Botão de adicionar nova etapa no seguimento -->
-              <v-btn v-show="tab === 'phases'" @click="addPhase()" variant="text" text="Adicionar" density="default" class="ml-auto text-none mr-4 btn-add-phase">
+              <v-btn v-if="vIf" :disabled="disable" v-show="tab === 'phases'" @click="addPhase()" variant="text" text="Adicionar" density="default" class="ml-auto text-none mr-4 btn-add-phase">
                 <template v-slot:prepend>
                   <v-icon style="display: flex; font-size: x-large; align-self: end" class="mr-1">mdi-plus</v-icon>
                 </template>
@@ -238,9 +266,10 @@ function closeDialog() {
 
         <!-- Footer -->
         <v-divider></v-divider>
-        <v-card-actions>
+        <v-card-actions v-if="vIf">
           <v-spacer></v-spacer>
           <v-btn
+            v-if="vIf"
             :disabled="verify"
             @click="saveFollowup"
             class="text-none mr-2 mt-1 mb-1"
@@ -275,8 +304,6 @@ h4 {
   font-size: 19px;
   font-weight: 500;
 }
-
-/*  */
 
 .flip-list-move {
   transition: transform 0.5s;

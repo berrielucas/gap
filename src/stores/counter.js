@@ -8,6 +8,8 @@ export const useCounterStore = defineStore(
     // Variáveis de autenticação
     const auth = ref(false);
     const user = ref({});
+    const wss = ref(null);
+    const isConnected = ref(false);
 
     // Stores do sistema
     const environments = ref([]);
@@ -27,12 +29,15 @@ export const useCounterStore = defineStore(
     }
 
     function logout(router) {
+      if (wss.value!==null) {
+        wss.value.close();
+      }
       auth.value = false;
       user.value = {};
       environments.value = [];
       followup.value = [];
       tasks.value = {};
-      router.push({ name: 'login' });
+      router.push({ name: "login" });
     }
 
     function removeParamsURL(url) {
@@ -41,14 +46,80 @@ export const useCounterStore = defineStore(
       window.history.replaceState({}, "", urlObj.toString());
     }
 
+    // Funções WebSockets
+    function connect() {
+      wss.value = new WebSocket(import.meta.env.VITE_URL_WEBSOCKET);
+      wss.value.onopen = onOpen;
+      wss.value.onclose = onClose;
+      wss.value.onmessage = (event) => {
+        onMessage(event);
+      };
+    }
+
+    function onMessage(event) {
+      const payload = JSON.parse(event.data);
+
+      switch (payload.action) {
+        // Task actions
+        case "receive-new-task":
+          tasks.value[`${payload.followup}`].push(payload.task);
+          followup.value.filter(
+            (f) => f._id === payload.followup
+          )[0].countTasks += 1;
+          break;
+
+        case "receive-deleted-task":
+          tasks.value[`${payload.followup}`] = tasks.value[
+            `${payload.followup}`
+          ].filter((t) => t._id !== payload.task._id);
+          followup.value.filter(
+            (f) => f._id === payload.followup
+          )[0].countTasks -= 1;
+          break;
+
+        case "receive-updated-task":
+          let index = tasks.value[`${payload.followup}`].indexOf(tasks.value[`${payload.followup}`].filter((t) => t._id === payload.task._id)[0]);
+          tasks.value[`${payload.followup}`] = tasks.value[`${payload.followup}`].filter((t) => t._id !== payload.task._id);
+          setTimeout(() => {
+            tasks.value[`${payload.followup}`].splice(index, 0, payload.task);
+          }, 1);
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    function onOpen() {
+      isConnected.value = true;
+      wss.value.send(
+        JSON.stringify({
+          action: "connect",
+          user: user.value,
+        })
+      );
+      console.log("Connected");
+    }
+
+    function onClose() {
+      isConnected.value = false;
+      wss.value = null;
+      console.log("Desconected");
+    }
+
     // Funções de store
     function listAllEnvironment(router = null) {
       loadEnvironments.value = true;
       setTimeout(() => {
         axios
-          .post(`${import.meta.env.VITE_URL_BASE_API}/Environment/listAllEnvironment`, {
-            tokenUser: user.value.token,
-          })
+          .post(
+            `${
+              import.meta.env.VITE_URL_BASE_API
+            }/Environment/listAllEnvironment`,
+            {
+              tokenUser: user.value.token,
+            }
+          )
           .then(function (response) {
             if (response.data.success) {
               environments.value = response.data.data;
@@ -73,10 +144,13 @@ export const useCounterStore = defineStore(
       loadFollowups.value = true;
       setTimeout(() => {
         axios
-          .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`, {
-            envId: env,
-            tokenUser: user.value.token,
-          })
+          .post(
+            `${import.meta.env.VITE_URL_BASE_API}/Followup/listAllFollowup`,
+            {
+              envId: env,
+              tokenUser: user.value.token,
+            }
+          )
           .then(function (response) {
             if (response.data.success) {
               followup.value = response.data.data;
@@ -98,13 +172,19 @@ export const useCounterStore = defineStore(
     function createFollowup(router, dataFollowup) {
       dataFollowup.tokenUser = user.value.token;
       axios
-        .post(`${import.meta.env.VITE_URL_BASE_API}/Followup/createFollowup`, dataFollowup)
+        .post(
+          `${import.meta.env.VITE_URL_BASE_API}/Followup/createFollowup`,
+          dataFollowup
+        )
         .then(function (response) {
           if (response.data.success) {
             const followupCreated = response.data.data;
             followup.value.push(followupCreated);
             tasks.value[`${followupCreated._id}`] = [];
-            router.push({ name: 'followup-unique', params: { idFollowup: followupCreated._id }});
+            router.push({
+              name: "followup-unique",
+              params: { idFollowup: followupCreated._id },
+            });
           }
         })
         .catch(function (error) {
@@ -122,10 +202,14 @@ export const useCounterStore = defineStore(
         .then(function (response) {
           if (response.data.success) {
             const followupRemove = response.data.data;
-            followup.value = followup.value.filter((t) => t._id !== followupRemove._id);
+            followup.value = followup.value.filter(
+              (t) => t._id !== followupRemove._id
+            );
             delete tasks.value[`${followupRemove._id}`];
             if (route.params.idFollowup === followupRemove._id) {
-              router.push(`/${environments.value.filter((e) => e._id === idEnv)[0].url}/`);
+              router.push(
+                `/${environments.value.filter((e) => e._id === idEnv)[0].url}/`
+              );
             }
           }
         })
@@ -145,9 +229,16 @@ export const useCounterStore = defineStore(
         .then(function (response) {
           if (response.data.success) {
             const followupUpdated = response.data.data;
-            followup.value[followup.value.indexOf(followup.value.filter((f) => f._id === idFollowup)[0])] = response.data.data;
+            followup.value[
+              followup.value.indexOf(
+                followup.value.filter((f) => f._id === idFollowup)[0]
+              )
+            ] = response.data.data;
             // router.push(`/${environments.value.filter(e=>e._id===idEnv)[0].url}/seguimento/${idFollowup}/`);
-            router.push({ name: 'followup-unique', params: { idFollowup: followupUpdated._id }});
+            router.push({
+              name: "followup-unique",
+              params: { idFollowup: followupUpdated._id },
+            });
           }
         })
         .catch(function (error) {
@@ -186,7 +277,11 @@ export const useCounterStore = defineStore(
         })
         .then(function (response) {
           if (response.data.success) {
-            tasks.value[`${followup}`][tasks.value[`${followup}`].indexOf(tasks.value[`${followup}`].filter((t) => t._id === task)[0])] = response.data.data;
+            tasks.value[`${followup}`][
+              tasks.value[`${followup}`].indexOf(
+                tasks.value[`${followup}`].filter((t) => t._id === task)[0]
+              )
+            ] = response.data.data;
           }
         })
         .catch(function (error) {
@@ -195,63 +290,110 @@ export const useCounterStore = defineStore(
     }
 
     function createTask(router, idFollowup, idPhase) {
-      axios
-        .post(`${import.meta.env.VITE_URL_BASE_API}/Task/createTask`, {
+      // axios
+      //   .post(`${import.meta.env.VITE_URL_BASE_API}/Task/createTask`, {
+      //     title: "Nova Tarefa",
+      //     description: "",
+      //     followup_id: idFollowup,
+      //     phase_id: idPhase,
+      //     tokenUser: user.value.token,
+      //   })
+      //   .then(function (response) {
+      //     if (response.data.success) {
+      //       const taskCreated = response.data.data;
+      //       tasks.value[`${idFollowup}`].unshift(taskCreated);
+      //       followup.value.filter(
+      //         (f) => f._id === idFollowup
+      //       )[0].countTasks += 1;
+      //       router.push({
+      //         name: "task-unique",
+      //         params: { idTask: taskCreated._id },
+      //       });
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+      wss.value.send(JSON.stringify({
+        action: "create-task",
+        taskData: {
           title: "Nova Tarefa",
           description: "",
           followup_id: idFollowup,
           phase_id: idPhase,
-          tokenUser: user.value.token,
-        })
-        .then(function (response) {
-          if (response.data.success) {
-            const taskCreated = response.data.data;
-            tasks.value[`${idFollowup}`].unshift(taskCreated);
-            followup.value.filter((f) => f._id === idFollowup)[0].countTasks += 1;
-            router.push({ name: "task-unique", params: { idTask: taskCreated._id } });
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+        },
+        followupId: idFollowup
+      }));
     }
 
     function updateTask(idTask, data, idFollowup, router) {
-      axios
-        .put(`${import.meta.env.VITE_URL_BASE_API}/Task/updateTask`, {
-          taskId: idTask,
-          dataTask: data,
-          followup_id: idFollowup,
-          tokenUser: user.value.token,
-        })
-        .then(function (response) {
-          if (response.data.success) {
-            // const taskUpdated = response.data.data;
-            router.push({ name: "followup-unique", params: { idFollowup: idFollowup } });
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+      // axios
+      //   .put(`${import.meta.env.VITE_URL_BASE_API}/Task/updateTask`, {
+      //     taskId: idTask,
+      //     dataTask: data,
+      //     followup_id: idFollowup,
+      //     tokenUser: user.value.token,
+      //   })
+      //   .then(function (response) {
+      //     if (response.data.success) {
+      //       // const taskUpdated = response.data.data;
+      //       router.push({
+      //         name: "followup-unique",
+      //         params: { idFollowup: idFollowup },
+      //       });
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+      wss.value.send(JSON.stringify({
+        action: "update-task",
+        taskId: idTask,
+        dataTask: data,
+        followupId: idFollowup
+      }));
+      router.push({
+        name: "followup-unique",
+        params: { idFollowup: idFollowup },
+      });
     }
 
     function deleteTask(idTask, idFollowup) {
-      axios
-        .post(`${import.meta.env.VITE_URL_BASE_API}/Task/deleteTask`, {
-          taskId: idTask,
-          followup_id: idFollowup,
-          tokenUser: user.value.token,
-        })
-        .then(function (response) {
-          if (response.data.success) {
-            const taskRemove = response.data.data;
-            tasks.value[`${idFollowup}`] = tasks.value[`${idFollowup}`].filter((t) => t._id !== taskRemove._id);
-            followup.value.filter((f) => f._id === idFollowup)[0].countTasks -= 1;
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+      // await fetch(`${import.meta.env.VITE_URL_BASE_API}/Task/deleteTask`, {
+      //   method: "POST",
+      //   mode: "cors",
+      //   cache: "no-cache",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   redirect: "follow",
+      //   body: JSON.stringify({
+      //     taskId: idTask,
+      //     followup_id: idFollowup,
+      //     tokenUser: user.value.token,
+      //   }),
+      // })
+      // .then(function (response) {
+      //   response.json().then((res) => {
+      //     if (res.success) {
+      //       const taskRemove = res.data;
+      //       tasks.value[`${idFollowup}`] = tasks.value[`${idFollowup}`].filter(
+      //         (t) => t._id !== taskRemove._id
+      //       );
+      //       followup.value.filter(
+      //         (f) => f._id === idFollowup
+      //       )[0].countTasks -= 1;
+      //     }
+      //   });
+      // })
+      // .catch(function (error) {
+      //   console.log(error);
+      // });
+      wss.value.send(JSON.stringify({
+        action: "delete-task",
+        taskId: idTask,
+        followupId: idFollowup
+      }));
     }
 
     // Funções Drag and Drop
@@ -266,56 +408,97 @@ export const useCounterStore = defineStore(
     async function dropPhase(ev, id, followupId) {
       ev.preventDefault();
       const data = ev.dataTransfer.getData("text");
-      let response = await fetch(`${import.meta.env.VITE_URL_BASE_API}/Task/updatePhaseTask`, {
-        method: "PUT",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        redirect: "follow",
-        body: JSON.stringify({
-          taskId: data,
-          dataTask: {
-            phase_id: id,
+      tasks.value[`${followupId}`][
+        tasks.value[`${followupId}`].indexOf(
+          tasks.value[`${followupId}`].filter((t) => t._id === data)[0]
+        )
+      ].phase_id = id;
+      const response = await fetch(
+        `${import.meta.env.VITE_URL_BASE_API}/Task/updatePhaseTask`,
+        {
+          method: "PUT",
+          mode: "cors",
+          cache: "no-cache",
+          headers: {
+            "Content-Type": "application/json",
           },
-          tokenUser: user.value.token,
-        }),
-      });
+          redirect: "follow",
+          body: JSON.stringify({
+            taskId: data,
+            dataTask: {
+              phase_id: id,
+            },
+            tokenUser: user.value.token,
+          }),
+        }
+      );
       if (response.ok) {
-        // document
-        //   .getElementById(id)
-        //   .querySelector(`#etapa-cards-${id}`)
-        //   .appendChild(document.getElementById(data));
-        getTask(data, followupId);
+        response
+          .json()
+          .then((res) => {
+            // if (res.success) {
+            //   tasks.value[`${followupId}`][
+            //     tasks.value[`${followupId}`].indexOf(
+            //       tasks.value[`${followupId}`].filter((t) => t._id === data)[0]
+            //     )
+            //   ] = res.data;
+            // }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       }
+
+      // if (response.ok) {
+      //   getTask(data, followupId);
+      //   console.log(response);
+      // }
     }
 
     let enterId = null;
     let leaveId = null;
     function dragEnter(ev, id) {
       enterId = id;
-      document.getElementById(id).querySelector(".model-task").style.display = "flex";
+      document.getElementById(id).querySelector(".model-task").style.display =
+        "flex";
       if (id !== leaveId && leaveId !== null) {
-        document.getElementById(leaveId).querySelector(".model-task").style.display = "none";
+        document
+          .getElementById(leaveId)
+          .querySelector(".model-task").style.display = "none";
       }
+      if (document.querySelectorAll(".phaseOculta").length>0) {
+        if (document.querySelectorAll(".phaseOculta")[0].classList.value.includes(enterId)) {
+          document.querySelectorAll(".phaseOculta")[0].style.backgroundColor = '#bdbdbd';
+        } else {
+          document.querySelectorAll(".phaseOculta")[0].style.backgroundColor = 'var(--bg-color-gray)';
+        }
+      }
+      // console.log(document.querySelectorAll(".phaseOculta")[0].classList);
     }
 
     function dragLeave(ev, id) {
       leaveId = id;
+      // console.log(leaveId);
       if (ev.target.id === id && enterId !== id) {
-        document.getElementById(id).querySelector(".model-task").style.display = "none";
+        document.getElementById(id).querySelector(".model-task").style.display =
+          "none";
       }
     }
 
     return {
       auth,
       user,
+      wss,
       environments,
       followup,
       tasks,
       login,
       logout,
+      connect,
+      onClose,
+      onMessage,
+      onOpen,
+      isConnected,
       removeParamsURL,
       listAllEnvironment,
       loadEnvironments,

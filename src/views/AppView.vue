@@ -13,6 +13,7 @@ onMounted(() => {
     if (!store.auth) {
       router.push({ name: 'login' });
     } else {
+      store.connect();
       if (route.name==='empty') {
         store.listAllEnvironment(router);
       }
@@ -57,9 +58,9 @@ onMounted(() => {
             <p class="" style="font-size: 16px;">{{ store.user.email }}</p>
           </div>
           <v-divider></v-divider>
-          <v-list-item @click="router.push('/ambientes/')" class="mb-1" append-icon="mdi-folder-multiple-outline" style="font-size: 15px; padding-inline: 1.5rem;">
+          <!-- <v-list-item @click="router.push('/ambientes/')" class="mb-1" append-icon="mdi-folder-multiple-outline" style="font-size: 15px; padding-inline: 1.5rem;">
             <v-list-item-title>Meus ambientes</v-list-item-title>
-          </v-list-item>
+          </v-list-item> -->
           <v-divider></v-divider>
           <v-list-item @click="store.logout(router)" class="mb-1" append-icon="mdi-logout" style="font-size: 15px; padding-block: 0; padding-inline: 1.5rem;">
             <v-list-item-title>Sair</v-list-item-title>

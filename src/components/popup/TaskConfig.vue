@@ -12,50 +12,54 @@ const store = useCounterStore();
 const dialog = ref(true);
 const dialogConfirm = ref(false);
 
-// onMounted(()=>{
-//   store.getTask(route.params.idTask, route.params.idFollowup);
-// });
-
 const task = ref(store.tasks[`${route.params.idFollowup}`].filter((t) => t._id === route.params.idTask)[0]);
 const modelTaskOrigin = JSON.stringify(store.tasks[`${route.params.idFollowup}`].filter((t) => t._id === route.params.idTask)[0]);
 
 function closeTask() {
   if (modelTaskOrigin !== JSON.stringify(task.value)) {
-    console.log("alterado");
-    store.updateTask(
-      JSON.parse(modelTaskOrigin)._id,
-      {
-        title: task.value.title,
-        description: task.value.description,
-        subTasks: task.value.subTasks,
-        comments: task.value.comments,
-        properties: task.value.properties,
-        phase_id: task.value.phase_id,
-      },
-      route.params.idFollowup,
-      router
-    );
+    if (store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task')) {
+      store.updateTask(
+        JSON.parse(modelTaskOrigin)._id,
+        {
+          title: task.value.title,
+          description: task.value.description,
+          subTasks: task.value.subTasks, 
+          comments: task.value.comments,
+          properties: task.value.properties,
+          phase_id: task.value.phase_id,
+        },
+        route.params.idFollowup,
+        router
+      );
+    } else {
+      router.push({ name: "followup-unique", params: { idFollowup: route.params.idFollowup } });
+    }
   } else {
-    console.log("original");
     router.push({ name: "followup-unique", params: { idFollowup: route.params.idFollowup } });
   }
 }
 
 function deleteTask() {
-  store.deleteTask(JSON.parse(modelTaskOrigin)._id, route.params.idFollowup);
-  router.push({ name: "followup-unique", params: { idFollowup: route.params.idFollowup } });
+  if (store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('delete-task')) {
+    store.deleteTask(JSON.parse(modelTaskOrigin)._id, route.params.idFollowup);
+    router.push({ name: "followup-unique", params: { idFollowup: route.params.idFollowup } });
+  }
 }
 
 function removeSubTask(idx) {
-  task.value.subTasks = task.value.subTasks.filter((i) => i.id !== idx);
+  if (store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task')) {
+    task.value.subTasks = task.value.subTasks.filter((i) => i.id !== idx);
+  }
 }
 
 function addSubTask() {
-  task.value.subTasks.unshift({
-    id: `${task.value.subTasks.length + 1}.${store.user._id}.${Date.now()}`,
-    title: `Subtarefa ${task.value.subTasks.length + 1}`,
-    complete: false,
-  });
+  if (store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task')) {
+    task.value.subTasks.unshift({
+      id: `${task.value.subTasks.length + 1}.${store.user._id}.${Date.now()}`,
+      title: `Subtarefa ${task.value.subTasks.length + 1}`,
+      complete: false,
+    });
+  }
 }
 </script>
 
@@ -110,7 +114,7 @@ function addSubTask() {
       <!-- Content -->
       <v-card-text style="display: flex; gap: 1rem; padding: 0 0 1rem 1rem; overflow: hidden; position: relative">
         <v-row>
-          <!-- Seção 01 -->
+          <!-- Sessão 01 -->
           <v-col cols="12" sm="8" style="padding-right: 0; display: flex; flex-direction: column; height: 100%; position: relative">
             <div style="height: 100%; overflow-y: auto; padding-bottom: 100px">
               <!-- Desciption -->
@@ -121,6 +125,7 @@ function addSubTask() {
                 <div style="width: 100%">
                   <h3 class="mt-2 ml-4" style="color: #aaaaaa; font-weight: 400"><b>Descrição</b></h3>
                   <v-textarea
+                    :disabled="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task') ? false : true"
                     v-model="task.description"
                     class="description-task"
                     style="width: 100%"
@@ -156,11 +161,9 @@ function addSubTask() {
                             <v-checkbox-btn v-model="st.complete" color="grey"></v-checkbox-btn>
                           </template>
 
-                          <!-- <span :class="st.complete ? 'text-grey' : 'text-primary'">{{ st.title }}</span> -->
-
                           <div style="display: flex; height: auto; align-items: center; flex-grow: 1; color: var(--text-color-dark); overflow: hidden">
                             <v-textarea
-                              :style="st.complete ? 'color: blue !important;' : 'color: red'"
+                              :disabled="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task') ? false : true"
                               class="input-subtarefa"
                               density="compact"
                               v-model="st.title"
@@ -178,7 +181,7 @@ function addSubTask() {
                           <template v-slot:append>
                             <v-scale-transition>
                               <v-icon v-if="st.complete" color="success">mdi-check</v-icon>
-                              <v-icon class="trash" v-if="!st.complete" icon="mdi-trash-can" variant="text" density="comfortable" @click="removeSubTask(st.id)"></v-icon>
+                              <v-icon class="trash" v-if="!st.complete&&store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task')" icon="mdi-trash-can" variant="text" density="comfortable" @click="removeSubTask(st.id)"></v-icon>
                             </v-scale-transition>
                           </template>
                         </v-list-item>
@@ -209,7 +212,6 @@ function addSubTask() {
                   <p class="mt-6" style="opacity: 0.5; text-align: center">Nenhum comentário</p>
                 </v-list-item>
               </v-scale-transition>
-              <!-- {{ task }} -->
             </div>
 
             <!-- Input de Comentario -->
@@ -226,7 +228,7 @@ function addSubTask() {
             </div>
           </v-col>
 
-          <!-- Seção 02 -->
+          <!-- Sessão 02 -->
           <v-col cols="12" sm="4" style="display: flex; flex-direction: column; border-left: solid 1px #dedede; max-height: 100%; width: 100%; overflow-y: auto">
             <v-btn
               class="text-none ml-auto mr-3 mb-3"
@@ -235,6 +237,8 @@ function addSubTask() {
               text="Excluir"
               variant="tonal"
               style="display: flex; border-radius: 10px; color: red; font-size: 15px"
+              v-if="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('delete-task')"
+              :disabled="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('delete-task') ? false : true"
             ></v-btn>
 
             <!-- Definições -->
@@ -252,6 +256,7 @@ function addSubTask() {
                 :items="store.followup.filter((f) => f._id === route.params.idFollowup)[0].phases"
                 single-line
                 hide-details
+                :disabled="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task') ? false : true"
               >
                 <template v-slot:prepend-inner>
                   <v-icon class="mr-1">mdi-list-status</v-icon>
@@ -287,12 +292,6 @@ function addSubTask() {
           </v-col>
         </v-row>
       </v-card-text>
-
-      <!-- Footer -->
-      <!-- <v-divider></v-divider> -->
-      <!-- <v-card-actions>
-          <v-spacer></v-spacer>
-        </v-card-actions> -->
     </v-card>
   </v-dialog>
 </template>

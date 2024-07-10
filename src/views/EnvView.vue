@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
-// import FollowupConfig from "@/components/popup/Teste.vue";
 import { useCounterStore } from "../stores/counter.js";
 const store = useCounterStore();
 const route = useRoute();
@@ -27,7 +26,7 @@ const search = ref("");
     <div class="d-flex px-2 my-2 justify-center">
       <v-menu transition="scale-transition" location="bottom center" v-model="menu" persistent>
         <template v-slot:activator="{ props }">
-          <v-list-item :class="menu ? 'env-active' : 'env-deactive'" v-bind="props" style="border-radius: 10px !important; width: 100%; margin: 0; transition: all 0.2s ease-in-out">
+          <v-list-item :disabled="true" :class="menu ? 'env-active' : 'env-deactive'" v-bind="props" style="border-radius: 10px !important; width: 100%; margin: 0; transition: all 0.2s ease-in-out">
             <template v-slot:append>
               <v-icon id="icon-env" :icon="!menu ? 'mdi-chevron-down' : 'mdi-chevron-up'"></v-icon>
             </template>
@@ -35,7 +34,7 @@ const search = ref("");
           </v-list-item>
         </template>
 
-        <v-list
+        <!-- <v-list
           style="
             margin: 0.5rem 0.3rem 0 -0.3rem;
             border-radius: 10px !important;
@@ -48,7 +47,7 @@ const search = ref("");
           <v-list-item @click="router.push('/ambientes/')" class="mb-1" append-icon="mdi-account-arrow-right-outline" style="font-size: 15px">
             <v-list-item-title>Sair do ambiente</v-list-item-title>
           </v-list-item>
-        </v-list>
+        </v-list> -->
       </v-menu>
     </div>
 
@@ -57,8 +56,7 @@ const search = ref("");
         <v-text-field v-model="search" density="compact" label="Buscar aqui" variant="solo" single-line hide-details append-inner-icon="mdi-magnify"></v-text-field>
       </div>
 
-      <!-- <FollowupConfig title="Novo Seguimento" :new="true" :envId="Env._id" :obj="JSON.stringify(followupModel)" /> -->
-      <v-btn variant="tonal" class="text-none btn-new" flat @click="router.push({ name: 'new-followup' })">
+      <v-btn v-if="store.user.environment.filter(e=>e.id===Env._id)[0].permissions.includes('create-followup')" :disabled="store.user.environment.filter(e=>e.id===Env._id)[0].permissions.includes('create-followup') ? false : true" variant="tonal" class="text-none btn-new" flat @click="router.push({ name: 'new-followup' })">
         <v-icon icon="mdi-plus"></v-icon>
         <h4>Novo Seguimento</h4>
       </v-btn>

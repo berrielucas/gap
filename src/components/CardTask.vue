@@ -22,12 +22,13 @@ function clear() {
   document.querySelectorAll(".model-task").forEach((e) => {
     e.style.display = "none";
   });
-  // store.getTask(card.value._id, route.params.idFollowup);
 }
 </script>
 
 <template>
   <div :id="id" class="card-item" @dragend="clear()" draggable="true" @dragstart="store.dragTask($event)">
+
+    <!-- Popup coonfirm -->
     <v-dialog v-model="dialogConfirm" width="auto" persistent>
       <v-card max-width="350" style="border-radius: 20px">
         <v-banner style="font-size: 15px; width: 100%; color: var(--text-color-dark)">
@@ -56,15 +57,18 @@ function clear() {
       </v-card>
     </v-dialog>
 
-    <v-btn @click="dialogConfirm = true" class="btn-trash actions" style="" icon="mdi-trash-can" size="30"></v-btn>
-    <v-btn @click="router.push({ name: 'task-unique', params: { idTask: card._id } })" class="btn-edit actions" style="" icon="mdi-pencil" size="30"></v-btn>
+    <v-btn v-if="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('delete-task')" @click="dialogConfirm = true" class="btn-trash actions" style="" icon="mdi-trash-can" size="30"></v-btn>
+    <v-btn @click="router.push({ name: 'task-unique', params: { idTask: card._id } })" class="btn-edit actions" style="" :icon="store.user.followup.filter(f=>f.id===route.params.idFollowup)[0].permissions.includes('edit-task') ?'mdi-pencil' : 'mdi-arrow-expand'" size="30"></v-btn>
     <div class="content">
+      <!-- Titulo card -->
       <p class="mb-1" style="font-size: 17px; font-weight: 400; font-style: italic; padding: 0;">
         <b>{{ card.title }}</b>
       </p>
-      <!-- <v-divider></v-divider> -->
+
+      <!-- Descrição card -->
       <p class="mt-1" style="text-align: justify; font-size: 16px" v-if="card.description !== '' && card.description !== null"><b>Descrição: </b>{{ card.description }}</p>
-      <!-- <p class="mt-1" style="padding: 0; font-size: 16px"><b>Criado em: </b>{{ `${new Date(card.createdAt).toLocaleDateString()} às ${new Date(card.createdAt).toLocaleTimeString()}` }}</p> -->
+
+      <!-- Footer card -->
       <v-divider class="mt-2 mb-2"></v-divider>
       <div class="footer">
         <span style="display: flex; align-items: center;">
@@ -77,6 +81,8 @@ function clear() {
         </span>
         <p class="ml-auto mr-0" style="font-size: small;"><b>{{ `${new Date(card.createdAt).toLocaleDateString()} às ${new Date(card.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` }}</b></p>
       </div>
+
+
     </div>
   </div>
 </template>
